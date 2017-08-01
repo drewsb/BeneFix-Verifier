@@ -11,5 +11,6 @@
 	<classpathentry kind="lib" path="/Users/drewboyette/Documents/BeneFix/BeneFix App/Jars/poi-ooxml-schemas-3.16-beta2.jar"/>
 	<classpathentry kind="lib" path="/Users/drewboyette/Documents/BeneFix/BeneFix App/Jars/poi-scratchpad-3.16-beta2.jar"/>
 	<classpathentry kind="lib" path="/Users/drewboyette/Documents/BeneFix/BeneFix App/Jars/xmlbeans-2.6.0.jar"/>
+	<classpathentry kind="lib" path="/Users/drewboyette/Downloads/commons-io-2.5/commons-io-2.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

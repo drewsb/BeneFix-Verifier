@@ -16,7 +16,7 @@ public class PlanStatistics {
 		this.mean = mean;
 		this.median = median;
 		this.std_dev = std_dev;
-		this.cv = std_dev/mean;
+		this.cv = Double.parseDouble(String.format("%.2f",std_dev/mean));
 	}
 	
 	public Double getMin(){

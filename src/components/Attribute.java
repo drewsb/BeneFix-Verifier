@@ -16,7 +16,7 @@ public class Attribute {
 		private static final long serialVersionUID = 1L;
 
 		{
-			put("0-18", "zero_eigtheen");
+			put("0-18", "zero_eighteen");
 			put("19-20", "nineteen_twenty");
 			put("21", "twenty_one");
 			put("22", "twenty_two");
@@ -89,8 +89,6 @@ public class Attribute {
 	
 	public static ArrayList<AttributeType> attributes = new ArrayList<AttributeType>(Arrays.asList(AttributeType.values()));
 
-	public Attribute() {
-	}
 	
 	public static String getFullAge(String numeral){
 		return ageBandMap.get(numeral);

@@ -113,7 +113,7 @@ public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? ex
 		reports = new ArrayList<Report<? extends Plan>>();
 		String output;
 		for (File selectedPlan : selectedPlans) {
-			String filename = selectedPlan.getName();
+			String filename = removeFileExtension(selectedPlan.getName());
 			output = String.format("Performing verification tests for %s.\n", filename);
 			System.out.println(output);
 			publish(output + "\n");
