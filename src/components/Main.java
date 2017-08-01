@@ -82,6 +82,7 @@ public class Main extends JPanel implements ActionListener {
 
 	public Main() {
 		super(new BorderLayout());
+		selectedPlans = new ArrayList<File>();
 		reports = new ArrayList<Report<? extends Plan>>();
 		medicalCarriers = new HashMap<String, Set<String>>();
 		dentalCarriers = new HashMap<String, Set<String>>();
@@ -247,8 +248,8 @@ public class Main extends JPanel implements ActionListener {
 			}
 			log.setCaretPosition(log.getDocument().getLength());
 		} else if (e.getSource() == verifyButton) {
-			if (selectedPlans == null) {
-				log.append("No files selected." + newline);
+			if (selectedPlans.isEmpty()) {
+				log.append("No file selected.\n" + newline);
 				return;
 			}
 
@@ -350,6 +351,14 @@ public class Main extends JPanel implements ActionListener {
 		ExcelWriter<? extends Plan> writer = null;
 		if (reports.size() == 0) {
 			log.append("No input files.");
+			return;
+		}
+		int totalErrors = 0;
+		for(Report<? extends Plan> r : reports){
+			totalErrors += r.getTotalErrorSize();
+		}
+		if(totalErrors == 0){
+			log.append("No output file produced.\n");
 			return;
 		}
 		switch(planType){
@@ -469,10 +478,6 @@ public class Main extends JPanel implements ActionListener {
 		// Display the window.
 		frame.pack();
 		frame.setVisible(true);
-	}
-
-	public static String removeFileExtension(String input) {
-		return input.substring(0, input.lastIndexOf("."));
 	}
 
 	public static void main(String[] args) {

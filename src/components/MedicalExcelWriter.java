@@ -50,45 +50,6 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 			"fifty_six", "fifty_seven", "fifty_eight", "fifty_nine", "sixty", "sixty_one", "sixty_two", "sixty_three",
 			"sixty_four", "sixty_five_plus" };
 
-	public static HashMap<AttributeType, Integer> attributeColMap = new HashMap<AttributeType, Integer>() {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = -7671154439931144427L;
-
-		{
-			put(AttributeType.CARRIER_ID, 0);
-			put(AttributeType.CARRIER_PLAN_ID, 1);
-			put(AttributeType.START_DATE, 2);
-			put(AttributeType.END_DATE, 3);
-			put(AttributeType.PRODUCT_NAME, 4);
-			put(AttributeType.PLAN_PDF_FILE_NAME, 5);
-			put(AttributeType.DEDUCTIBLE_INDIV, 6);
-			put(AttributeType.DEDUCTIBLE_FAMILY, 7);
-			put(AttributeType.OON_DEDUCTIBLE_INDIVIDUAL, 8);
-			put(AttributeType.OON_DEDUCTIBLE_FAMILY, 9);
-			put(AttributeType.COINSURANCE, 10);
-			put(AttributeType.DR_VISIT_COPAY, 11);
-			put(AttributeType.SPECIALIST_VISITS_COPAY, 12);
-			put(AttributeType.ER_COPAY, 13);
-			put(AttributeType.URGENT_CARE_COPAY, 14);
-			put(AttributeType.RX_COPAY, 15);
-			put(AttributeType.RX_MAIL_COPAY, 16);
-			put(AttributeType.OOP_MAX_INDIV, 17);
-			put(AttributeType.OOP_MAX_FAMILY, 18);
-			put(AttributeType.OON_OOP_MAX_INDIVIDUAL, 19);
-			put(AttributeType.OON_OOP_MAX_FAMILY, 20);
-			put(AttributeType.IN_PATIENT_HOSPITAL, 21);
-			put(AttributeType.OUTPATIENT_DIAGNOSTIC_LAB, 22);
-			put(AttributeType.OUTPATIENT_SURGERY, 23);
-			put(AttributeType.OUTPATIENT_COMPLEX_IMAGING, 24);
-			put(AttributeType.PHYSICAL_OCCUPATIONAL_THERAPY, 25);
-			put(AttributeType.STATE, 26);
-			put(AttributeType.GROUP_RATING_AREAS, 27);
-			put(AttributeType.SERVICE_ZONES, 28);
-		}
-	};
-
 	@SuppressWarnings("unchecked")
 	public MedicalExcelWriter(JTextArea log, ArrayList<Report<? extends Plan>> reports) {
 		super();
@@ -372,7 +333,6 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 			for (MedicalPlan plan : entry.getKey().getPlans()) {
 				col_index = 0;
 				row = sheet.createRow(++row_index);
-				
 				cell = row.createCell(col_index++);
 				cell.setCellValue(plan.product_name);
 				cell = row.createCell(col_index++);

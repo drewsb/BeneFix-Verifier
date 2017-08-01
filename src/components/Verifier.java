@@ -1,5 +1,7 @@
 package components;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -16,11 +18,11 @@ public interface Verifier<E extends Plan> {
 
 	public void verifyCV();
 
-	public void verifyPDFMapping();
+	public void verifyPDFMapping() throws IOException;
 	
 	public ArrayList<E> getPlans();
 	
-	public void generatePlans();
+	public void generatePlans() throws MalformedURLException;
 	
 	/*
 	 * Default method to retrieve the value of a cell from an Excel workbook.
