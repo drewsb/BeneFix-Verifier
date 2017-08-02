@@ -9,6 +9,9 @@ import javax.swing.JTextArea;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import plan.DentalPlan;
+import plan.Plan;
+
 public class DentalExcelWriter implements ExcelWriter<DentalPlan>{
 
 	final XSSFWorkbook workbook;

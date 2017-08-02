@@ -9,6 +9,9 @@ import javax.swing.JTextArea;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import plan.Plan;
+import plan.VisionPlan;
+
 public class VisionExcelWriter implements ExcelWriter<VisionPlan> {
 
 	final XSSFWorkbook workbook;

@@ -39,6 +39,11 @@ import javax.swing.UIManager;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import components.Main.State;
+import plan.DentalPlan;
+import plan.MedicalPlan;
+import plan.Plan;
+import plan.VisionPlan;
+import verifier.Verifier;
 
 public class Main extends JPanel implements ActionListener {
 	private static final long serialVersionUID = 1L;
@@ -69,7 +74,7 @@ public class Main extends JPanel implements ActionListener {
 	HashMap<String, Set<String>> sourceCarriers;
 
 	public enum Carrier {
-		Anthem, UPMC, Aetna, CPA, NEPA, WPA, IBC, CBC, AmeriHealth, UHC, Oxford, Cigna, Horizon, Geisinger, Delta
+		Anthem, UPMC, Aetna, CPA, NEPA, WPA, IBC, CBC, AmeriHealth, UHC, Oxford, Cigna, Horizon, Geisinger, Delta, NONE
 	}
 
 	public enum State {
@@ -79,6 +84,23 @@ public class Main extends JPanel implements ActionListener {
 	public enum PlanType {
 		Medical, Dental, Vision
 	}
+	
+	public static HashMap<String, Carrier> carrierAbbrevMap = new HashMap<String, Carrier>() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		{
+			put("Highmark Northeastern PA", Carrier.NEPA);
+			put("Highmark BLUE Shield", Carrier.CPA);
+			put("Independence", Carrier.IBC);
+			put("UnitedHealthcare", Carrier.UHC);
+			put("United Oxford", Carrier.Oxford);
+			put("Capital BLUE", Carrier.CBC);
+			put("Highmark Western", Carrier.WPA);
+		}
+	};
 
 	public Main() {
 		super(new BorderLayout());

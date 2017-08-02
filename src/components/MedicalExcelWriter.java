@@ -18,7 +18,10 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import components.Attribute.AttributeType;
-import components.PlanError.RateType;
+import plan.MedicalPlan;
+import plan.Plan;
+import plan.PlanError;
+import plan.PlanError.RateType;
 
 /*
  * Uses Apache Poi package found at https://www.apache.org. 
@@ -163,8 +166,8 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 
 		for (PlanError error : p.getErrors()) {
 			int location = 0;
-			AttributeType att = error.attribute;
-			RateType rateType = error.type;
+			AttributeType att = error.getAttribute();
+			RateType rateType = error.getType();
 
 			if (att == AttributeType.NONE) {
 				cell = row.getCell(location);

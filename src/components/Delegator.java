@@ -31,6 +31,12 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import components.Main.Carrier;
 import components.Main.State;
+import plan.Plan;
+import plan.PlanWarning;
+import verifier.DentalVerifier;
+import verifier.MedicalVerifier;
+import verifier.Verifier;
+import verifier.VisionVerifier;
 import components.Main.PlanType;
 
 public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? extends Plan>>, String> {
@@ -60,7 +66,7 @@ public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? ex
 	String end_date;
 
 	ArrayList<Report<? extends Plan>> reports;
-	
+
 	ArrayList<E> plans;
 
 	public Delegator(final Carrier carrierType, PlanType planType, final ArrayList<File> selectedPlans,
@@ -120,14 +126,18 @@ public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? ex
 
 			Verifier<E> planVerifier = getVerifier(planType, new XSSFWorkbook(selectedPlan));
 			ArrayList<E> plans;
-			
+			ArrayList<PlanWarning> warnings;
+
 			planVerifier.generatePlans();
+			plans = (ArrayList<E>) planVerifier.getPlans();
+			Double numPlans = (double) plans.size();
+			
 			output = String.format("Statistics computed.");
 			System.out.println(output);
 			publish(output + "\n");
 			index++;
 			setProgress(100 * (index) / size);
-			
+
 			if (monCheck) {
 				planVerifier.verifyMonotonicity();
 				output = "Monotonocity checks complete.";
@@ -144,22 +154,41 @@ public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? ex
 				publish(output + "\n");
 				index++;
 				setProgress(100 * (index) / size);
-			}
+			} 
 
 			if (pdfCheck) {
-				planVerifier.verifyPDFMapping();
+				output = "\nBeginning PDF verification tests.\n";
+				publish(output);
+				Double plan_index = 0.0;
+				for (E plan : plans) {
+					if (plan.hasPDFUrl()) {
+						planVerifier.verifyPDFMapping(plan);
+						Double progress = 100 * (index + (++plan_index / numPlans)) / size;
+						setProgress(progress.intValue());
+						
+						output = String.format("PDF check complete for plan %s.", plan.getProductName());
+						System.out.println(output);
+						publish(output + "\n");
+					}
+				}
 				output = "PDF checks complete.\n";
 				System.out.println(output);
 				publish(output + "\n");
 				index++;
-				setProgress(100 * (index) / size);
 			}
 
-			plans = (ArrayList<E>) planVerifier.getPlans();
-			Report<E> report = new Report<E>(filename, plans);
+			warnings = planVerifier.getWarnings();
+			if (!warnings.isEmpty()) {
+				for (PlanWarning w : warnings) {
+					publish("WARNING: " + w.getWarningMessage() + "\n");
+				}
+				publish("\n");
+			}
+			Report<E> report = new Report<E>(filename, plans, warnings);
 			report.hasTobbacoRates = plans.get(0).hasTobaccoRates();
 			reports.add(report);
-			output = String.format("File: %s verified\nTotal Errors: %d\n", filename, report.getTotalErrorSize());
+			output = String.format("File: %s verified\nTotal Errors: %d\nTotal Warnings: %d\n", filename,
+					report.getTotalErrorSize(), warnings.size());
 			System.out.println(output);
 			publish(output + "\n");
 		}
@@ -173,7 +202,7 @@ public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? ex
 			throws EncryptedDocumentException, InvalidFormatException, IOException {
 		switch (type) {
 		case Medical:
-			return new MedicalVerifier(workbook);
+			return new MedicalVerifier(workbook, carrierType);
 		case Dental:
 			return new DentalVerifier(workbook);
 		case Vision:

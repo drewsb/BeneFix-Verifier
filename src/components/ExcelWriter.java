@@ -6,6 +6,8 @@ import java.util.HashMap;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import plan.Plan;
+
 public interface ExcelWriter<E extends Plan> {
 
 	public void populateLog() throws FileNotFoundException, IOException;
