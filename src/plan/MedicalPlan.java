@@ -1,5 +1,6 @@
 package plan;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +42,7 @@ public class MedicalPlan implements Comparable, Plan {
 	public String outpatient_diagnostic_x_ray;
 	public String outpatient_complex_imaging;
 	public String physical_occupational_therapy;
-	public URL plan_pdf_url;
+	public String plan_pdf_url;
 	public String group_rating_area;
 	public String service_zones;
 	public String plan_name;
@@ -61,7 +62,7 @@ public class MedicalPlan implements Comparable, Plan {
 			String er_copay, String urgent_care_copay, String rx_copay, String rx_mail_copay, String oop_max_indiv,
 			String oop_max_family, String oon_oop_max_indiv, String oon_oop_max_family, String in_patient_hospital,
 			String outpatient_diagnostic_lab, String outpatient_surgery, String outpatient_diagnostic_x_ray,
-			String outpatient_complex_imaging, String physical_occupupational_therapy, URL pdf_url, String state, String group_rating_area,
+			String outpatient_complex_imaging, String physical_occupupational_therapy, String pdf_url, String state, String group_rating_area,
 			String service_zones, HashMap<String, Double> non_tob_dict,
 			HashMap<String, Double> non_tob_diff_dict, HashMap<String, Double> tob_dict,
 			HashMap<String, Double> tob_diff_dict) {
@@ -110,9 +111,10 @@ public class MedicalPlan implements Comparable, Plan {
 		this.non_tobacco_stats = null;
 		this.tobacco_stats = null;
 		this.errors = new ArrayList<PlanError>();
+		this.warnings = new ArrayList<PlanWarning>();
 	}
 
-	public MedicalPlan() {
+	public MedicalPlan() throws MalformedURLException {
 		this.carrier_id = 0;
 		this.carrier_plan_id = "";
 		this.start_date = "";
@@ -140,6 +142,7 @@ public class MedicalPlan implements Comparable, Plan {
 		this.outpatient_diagnostic_x_ray = "";
 		this.outpatient_complex_imaging = "";
 		this.physical_occupational_therapy = "";
+		this.plan_pdf_url = "";
 		this.group_rating_area = "";
 		this.service_zones = "";
 		this.state = "";
@@ -148,6 +151,7 @@ public class MedicalPlan implements Comparable, Plan {
 		this.tobacco_dict = new HashMap<String, Double>();
 		this.tobacco_diff_dict = new HashMap<String, Double>();
 		this.errors = new ArrayList<PlanError>();
+		this.warnings = new ArrayList<PlanWarning>();
 	}
 
 	/*

@@ -60,7 +60,7 @@ public class Main extends JPanel implements ActionListener {
 	Delegator<?> delegator;
 	Verifier<Plan> verifier;
 	ArrayList<Report<? extends Plan>> reports;
-	JCheckBox monBox, cvBox, pdfBox, statisticsBox, errorSummaryBox;
+	JCheckBox monBox, cvBox, incBox, pdfBox, statisticsBox, errorSummaryBox;
 	File inputFile;
 	String filename;
 	Boolean done;
@@ -149,6 +149,7 @@ public class Main extends JPanel implements ActionListener {
 
 		monBox = new JCheckBox("Monotonocity");
 		cvBox = new JCheckBox("Covariance");
+		incBox = new JCheckBox("Increment");
 		pdfBox = new JCheckBox("PDF Matching");
 
 		// Options for the JComboBox
@@ -210,6 +211,7 @@ public class Main extends JPanel implements ActionListener {
 		JPanel boxPanel = new JPanel();
 		boxPanel.add(monBox);
 		boxPanel.add(cvBox);
+		boxPanel.add(incBox);
 		boxPanel.add(pdfBox);
 
 
@@ -247,7 +249,8 @@ public class Main extends JPanel implements ActionListener {
 		 */
 		monBox.setSelected(true);
 		cvBox.setSelected(true);
-		pdfBox.setSelected(true);
+		incBox.setSelected(true);
+		pdfBox.setSelected(false);
 		
 		errorSummaryBox.setSelected(true);
 		statisticsBox.setSelected(true);
@@ -285,15 +288,15 @@ public class Main extends JPanel implements ActionListener {
 			switch(planType){
 			case Medical:
 				delegator = new Delegator<MedicalPlan>(carrierType, planType, selectedPlans, monBox.isSelected(), cvBox.isSelected(),
-						pdfBox.isSelected(), log, progressBar);
+						incBox.isSelected(), pdfBox.isSelected(), log, progressBar);
 				break;
 			case Dental:
 				delegator = new Delegator<DentalPlan>(carrierType, planType, selectedPlans, monBox.isSelected(), cvBox.isSelected(),
-						pdfBox.isSelected(), log, progressBar);
+						incBox.isSelected(), pdfBox.isSelected(), log, progressBar);
 				break;
 			case Vision:
 				delegator = new Delegator<VisionPlan>(carrierType, planType, selectedPlans, monBox.isSelected(), cvBox.isSelected(),
-						pdfBox.isSelected(), log, progressBar);
+						incBox.isSelected(), pdfBox.isSelected(), log, progressBar);
 				break;
 			
 			}
@@ -348,7 +351,7 @@ public class Main extends JPanel implements ActionListener {
 		} else if (e.getSource() == clearButton) {
 			selectedPlans.clear();
 			reports.clear();
-			log.append("Cleared files.\n");
+			log.append("\nCleared files.\n");
 		} else if (e.getSource() == typeBox) {
 			checkPlan();
 			switch (planType) {
@@ -376,10 +379,12 @@ public class Main extends JPanel implements ActionListener {
 			return;
 		}
 		int totalErrors = 0;
+		int totalWarnings = 0;
 		for(Report<? extends Plan> r : reports){
 			totalErrors += r.getTotalErrorSize();
+			totalWarnings += r.getTotalWarningSize();
 		}
-		if(totalErrors == 0){
+		if(totalErrors + totalWarnings == 0){
 			log.append("No output file produced.\n");
 			return;
 		}

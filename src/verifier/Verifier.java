@@ -18,16 +18,20 @@ import plan.PlanWarning;
 public interface Verifier<E extends Plan> {
 
 	public void verifyMonotonicity();
+	
+	public void verifyIncrements();
 
 	public void verifyCV();
 
 	public void verifyPDFMapping(E plan) throws IOException;
-	
+		
 	public ArrayList<E> getPlans();
 	
 	public void generatePlans() throws MalformedURLException;
 	
 	public ArrayList<PlanWarning> getWarnings();
+	
+	public HashMap<String, Integer> getAttributeIndexMap();
 	
 	/*
 	 * Default method to retrieve the value of a cell from an Excel workbook.

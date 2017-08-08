@@ -64,7 +64,7 @@ public class Product_Name {
 	}
 	
 	public enum Plan {
-		Choice_Plus, EPO, PPO, HMO, POS, HSA, QPOS, Savings_Plus, Wellspan_HNOption, LVHN_HNOption, None
+		Choice_Plus, EPO, DPOS, PPO, HMO, POS, HSA, QPOS, Savings_Plus, Wellspan_HNOption, LVHN_HNOption, None
 	}
 	
 	@Override
@@ -89,10 +89,12 @@ public class Product_Name {
 	}
 	
 	public Plan getPlan() {
-		String str = original_name.toLowerCase().replaceAll("[\\s_]", "");
-		for(Plan p : plans){
-			if(str.contains(p.toString().toLowerCase())){
-				return p;
+		String[] strToks = original_name.toLowerCase().split("\\s");
+		for(String str : strToks){
+			for(Plan p : plans){
+				if(p.toString().toLowerCase().equals(str)){
+					return p;
+				}
 			}
 		}
 		return Plan.None;

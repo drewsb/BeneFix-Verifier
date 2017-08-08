@@ -2,6 +2,7 @@ package plan;
 
 import components.Attribute;
 import components.Attribute.AttributeType;
+import plan.PlanError.RateType;
 
 public class PlanWarning {
 
@@ -12,10 +13,10 @@ public class PlanWarning {
 	final String correctVal;
 	
 	String ageBand = "";
-	String secondPlanName = "";
+	AttributeType secondAtt;
 	
 	public enum Warning{
-		MISSING_ATTRIBUTE, METAL_NOT_FOUND, PLAN_TYPE_NOT_FOUND
+		MISSING_ATTRIBUTE, METAL_NOT_FOUND, PLAN_TYPE_NOT_FOUND, INVALID_PDF_LINK, UNRECOGNIZED_FORMAT
 	}
 
 	public PlanWarning(Warning warning, AttributeType attribute, RateType type, String incorrectVal, String correctVal) {
@@ -26,16 +27,16 @@ public class PlanWarning {
 		this.correctVal = correctVal;
 	}
 	
-	public String getWarningType(){
-		return warningType.toString();
+	public Warning getWarningType(){
+		return warningType;
+	}
+	
+	public AttributeType getAttributeType(){
+		return attribute;
 	}
 	
 	public void setAgeBand(String age){
 		this.ageBand = age;
-	}
-	
-	public void setSecondPlanName(String name){
-		this.secondPlanName = name;
 	}
 	
 	public String getWarningMessage(){
@@ -46,13 +47,14 @@ public class PlanWarning {
 			return String.format("Could not determine metal from product name %s.", incorrectVal);
 		case PLAN_TYPE_NOT_FOUND:
 			return String.format("Could not determine plan type from product name %s.", incorrectVal);
+		case INVALID_PDF_LINK:
+			return String.format("Invalid PDF link: %s.", incorrectVal);
+		case UNRECOGNIZED_FORMAT:
+			return String.format("Could not recognize format of %s: %s", attribute.toString().toLowerCase(), incorrectVal);
 		}
 		
 		return "N/A";
 	}
+
 	
-	
-	public enum RateType {
-		NONE, NON_TOBACCO, TOBACCO
-	}
 }

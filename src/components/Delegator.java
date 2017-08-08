@@ -54,6 +54,8 @@ public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? ex
 	final Boolean monCheck;
 
 	final Boolean cvCheck;
+	
+	final Boolean incCheck;
 
 	final Boolean pdfCheck;
 
@@ -70,13 +72,14 @@ public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? ex
 	ArrayList<E> plans;
 
 	public Delegator(final Carrier carrierType, PlanType planType, final ArrayList<File> selectedPlans,
-			final Boolean monCheck, final Boolean cvCheck, final Boolean pdfCheck, final JTextArea textArea,
+			final Boolean monCheck, final Boolean cvCheck, final Boolean incCheck, final Boolean pdfCheck, final JTextArea textArea,
 			final JProgressBar bar) {
 		this.carrierType = carrierType;
 		this.planType = planType;
 		this.selectedPlans = selectedPlans;
 		this.monCheck = monCheck;
 		this.cvCheck = cvCheck;
+		this.incCheck = incCheck;
 		this.pdfCheck = pdfCheck;
 		this.textArea = textArea;
 		this.bar = bar;
@@ -87,6 +90,7 @@ public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? ex
 		int multiplier = (monCheck) ? 1 : 0; // If checking for monotonocity,
 												// increase total runtime
 		multiplier += (cvCheck) ? 1 : 0; // CV check
+		multiplier += (incCheck) ? 1 : 0; // pdf check
 		multiplier += (pdfCheck) ? 1 : 0; // pdf check
 		multiplier += 1; // Stats check (will always occur)
 		size = selectedPlans.size() * multiplier;
@@ -155,6 +159,15 @@ public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? ex
 				index++;
 				setProgress(100 * (index) / size);
 			} 
+			
+			if (incCheck) {
+				planVerifier.verifyIncrements();
+				output = "Increment checks complete.";
+				System.out.println(output);
+				publish(output + "\n");
+				index++;
+				setProgress(100 * (index) / size);
+			} 
 
 			if (pdfCheck) {
 				output = "\nBeginning PDF verification tests.\n";
@@ -184,11 +197,11 @@ public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? ex
 				}
 				publish("\n");
 			}
-			Report<E> report = new Report<E>(filename, plans, warnings);
+			Report<E> report = new Report<E>(filename, plans, warnings, planVerifier.getAttributeIndexMap());
 			report.hasTobbacoRates = plans.get(0).hasTobaccoRates();
 			reports.add(report);
 			output = String.format("File: %s verified\nTotal Errors: %d\nTotal Warnings: %d\n", filename,
-					report.getTotalErrorSize(), warnings.size());
+					report.getTotalErrorSize(), report.getTotalWarningSize());
 			System.out.println(output);
 			publish(output + "\n");
 		}

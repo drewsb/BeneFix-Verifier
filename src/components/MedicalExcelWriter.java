@@ -3,6 +3,7 @@ package components;
 import java.io.FileNotFoundException;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,10 +19,10 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import components.Attribute.AttributeType;
-import plan.MedicalPlan;
-import plan.Plan;
-import plan.PlanError;
-import plan.PlanError.RateType;
+import components.Main.Carrier;
+import plan.*;
+import plan.PlanError.*;
+import plan.PlanWarning.*;
 
 /*
  * Uses Apache Poi package found at https://www.apache.org. 
@@ -36,22 +37,7 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 
 	static XSSFColor xred = new XSSFColor(new java.awt.Color(240, 128, 128));
 
-	static XSSFCellStyle highlighter;
-
-	public String[] templateData = { "carrier_id", "carrier_plan_id", "start_date", "end_date", "product_name",
-			"plan_pdf_file_name", "deductible_indiv", "deductible_family", "oon_deductible_individual",
-			"oon_deductible_family", "coinsurance", "dr_visit_copay", "specialist_visits_copay", "er_copay",
-			"urgent_care_copay", "rx_copay", "rx_mail_copay", "oop_max_indiv", "oop_max_family",
-			"oon_oop_max_individual", "oon_oop_max_family", "in_patient_hospital", "outpatient_diagnostic_lab",
-			"outpatient_surgery", "outpatient_diagnostic_x_ray", "outpatient_complex_imaging",
-			"physical_occupational_therapy", "state", "group_rating_areas", "service_zones", "zero_eighteen",
-			"nineteen_twenty", "twenty_one", "twenty_two", "twenty_three", "twenty_four", "twenty_five", "twenty_six",
-			"twenty_seven", "twenty_eight", "twenty_nine", "thirty", "thirty_one", "thirty_two", "thirty_three",
-			"thirty_four", "thirty_five", "thirty_six", "thirty_seven", "thirty_eight", "thirty_nine", "forty",
-			"forty_one", "forty_two", "forty_three", "forty_four", "forty_five", "forty_six", "forty_seven",
-			"forty_eight", "forty_nine", "fifty", "fifty_one", "fifty_two", "fifty_three", "fifty_four", "fifty_five",
-			"fifty_six", "fifty_seven", "fifty_eight", "fifty_nine", "sixty", "sixty_one", "sixty_two", "sixty_three",
-			"sixty_four", "sixty_five_plus" };
+	static XSSFColor xyellow = new XSSFColor(new java.awt.Color(244, 241, 66));
 
 	@SuppressWarnings("unchecked")
 	public MedicalExcelWriter(JTextArea log, ArrayList<Report<? extends Plan>> reports) {
@@ -68,69 +54,167 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 
 	}
 
-	public static void populateRow(XSSFWorkbook workbook, Sheet sheet, Row row, MedicalPlan p) {
+	public static void populateRow(XSSFWorkbook workbook, HashMap<String, Integer> attributeIndexMap, Sheet sheet,
+			Row row, MedicalPlan p) {
 		int colCount = 0;
 		Cell cell = row.createCell(colCount++);
-		cell.setCellValue(p.carrier_id);
-		cell = row.createCell(colCount++);
-		cell.setCellValue(p.carrier_plan_id);
-		cell = row.createCell(colCount++);
-		cell.setCellValue((String) p.start_date);
-		cell = row.createCell(colCount++);
-		cell.setCellValue((String) p.end_date);
-		cell = row.createCell(colCount++);
-		cell.setCellValue((String) p.product_name);
-		cell = row.createCell(colCount++);
-		cell.setCellValue((String) p.plan_pdf_file_name);
-		cell = row.createCell(colCount++);
-		cell.setCellValue(p.deductible_indiv);
-		cell = row.createCell(colCount++);
-		cell.setCellValue((String) p.deductible_family);
-		cell = row.createCell(colCount++);
-		cell.setCellValue((String) p.oon_deductible_indiv);
-		cell = row.createCell(colCount++);
-		cell.setCellValue((String) p.oon_deductible_family);
-		cell = row.createCell(colCount++);
-		cell.setCellValue(p.coinsurance);
-		cell = row.createCell(colCount++);
-		cell.setCellValue((String) p.dr_visit_copay);
-		cell = row.createCell(colCount++);
-		cell.setCellValue((String) p.specialist_visit_copay);
-		cell = row.createCell(colCount++);
-		cell.setCellValue((String) p.er_copay);
-		cell = row.createCell(colCount++);
-		cell.setCellValue((String) p.urgent_care_copay);
-		cell = row.createCell(colCount++);
-		cell.setCellValue((String) p.rx_copay);
-		cell = row.createCell(colCount++);
-		cell.setCellValue((String) p.rx_mail_copay);
-		cell = row.createCell(colCount++);
-		cell.setCellValue(p.oop_max_indiv);
-		cell = row.createCell(colCount++);
-		cell.setCellValue(p.oop_max_family);
-		cell = row.createCell(colCount++);
-		cell.setCellValue(p.oon_oop_max_indiv);
-		cell = row.createCell(colCount++);
-		cell.setCellValue(p.oon_oop_max_family);
-		cell = row.createCell(colCount++);
-		cell.setCellValue(p.in_patient_hospital);
-		cell = row.createCell(colCount++);
-		cell.setCellValue(p.outpatient_diagnostic_lab);
-		cell = row.createCell(colCount++);
-		cell.setCellValue(p.outpatient_surgery);
-		cell = row.createCell(colCount++);
-		cell.setCellValue(p.outpatient_diagnostic_x_ray);
-		cell = row.createCell(colCount++);
-		cell.setCellValue(p.outpatient_complex_imaging);
-		cell = row.createCell(colCount++);
-		cell.setCellValue(p.physical_occupational_therapy);
-		cell = row.createCell(colCount++);
-		cell.setCellValue(p.state);
-		cell = row.createCell(colCount++);
-		cell.setCellValue((String) p.group_rating_area);
-		cell = row.createCell(colCount++);
-		cell.setCellValue(p.service_zones);
-		cell = row.createCell(colCount++);
+		if (attributeIndexMap.containsKey("carrier")) {
+			cell.setCellValue(p.carrier.toString());
+			cell = row.createCell(colCount++);
+		}
+		if (attributeIndexMap.containsKey("carrier_id")) {
+			cell.setCellValue(p.carrier_id);
+			cell = row.createCell(colCount++);
+		}
+		if (attributeIndexMap.containsKey("carrier_plan_id")) {
+			cell.setCellValue((String) p.carrier_plan_id);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("start_date")) {
+			cell.setCellValue((String) p.start_date);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("end_date")) {
+			cell.setCellValue((String) p.end_date);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("product_name")) {
+			cell.setCellValue((String) p.product_name);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("plan_pdf_file_name")) {
+			cell.setCellValue((String) p.plan_pdf_file_name);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("state")) {
+			cell.setCellValue((String) p.state);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("group_rating_areas")) {
+			cell.setCellValue((String) p.group_rating_area);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("service_zones")) {
+			cell.setCellValue((String) p.service_zones);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("deductible_indiv")) {
+			cell.setCellValue((String) p.deductible_indiv);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("deductible_family")) {
+			cell.setCellValue((String) p.deductible_family);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("oon_deductible_individual")) {
+			cell.setCellValue((String) p.oon_deductible_indiv);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("oon_deductible_family")) {
+			cell.setCellValue((String) p.oon_deductible_family);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("coinsurance")) {
+			cell.setCellValue((String) p.coinsurance);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("dr_visit_copay")) {
+			cell.setCellValue((String) p.dr_visit_copay);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("specialist_visits_copay")) {
+			cell.setCellValue((String) p.specialist_visit_copay);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("er_copay")) {
+			cell.setCellValue((String) p.er_copay);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("urgent_care_copay")) {
+			cell.setCellValue((String) p.urgent_care_copay);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("rx_copay")) {
+			cell.setCellValue((String) p.rx_copay);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("rx_mail_copay")) {
+			cell.setCellValue((String) p.rx_mail_copay);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("oop_max_indiv")) {
+			cell.setCellValue((String) p.oop_max_indiv);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("oop_max_family")) {
+			cell.setCellValue((String) p.oop_max_family);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("oon_oop_max_individual")) {
+			cell.setCellValue((String) p.oon_oop_max_indiv);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("oon_oop_max_family")) {
+			cell.setCellValue((String) p.oon_oop_max_family);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("in_patient_hospital")) {
+			cell.setCellValue((String) p.in_patient_hospital);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("outpatient_diagnostic_lab")) {
+			cell.setCellValue((String) p.outpatient_diagnostic_lab);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("outpatient_surgery")) {
+			cell.setCellValue((String) p.outpatient_surgery);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("outpatient_diagnostic_x_ray")) {
+			cell.setCellValue((String) p.outpatient_diagnostic_x_ray);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("outpatient_complex_imaging")) {
+			cell.setCellValue((String) p.outpatient_complex_imaging);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("physical_occupational_therapy")) {
+			cell.setCellValue((String) p.physical_occupational_therapy);
+			cell = row.createCell(colCount++);
+		}
+
+		if (attributeIndexMap.containsKey("plan_pdf_file_url")) {
+			cell.setCellValue(p.plan_pdf_url.toString());
+			cell = row.createCell(colCount++);
+		}
 		cell.setCellValue(p.non_tobacco_dict.get("0-18"));
 		cell = row.createCell(colCount++);
 		cell.setCellValue(p.non_tobacco_dict.get("19-20"));
@@ -160,13 +244,24 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 			cell.setCellValue(p.non_tobacco_dict.get(max_age_string));
 		}
 
-		XSSFCellStyle highlighter = workbook.createCellStyle();
-		highlighter.setFillForegroundColor(xred);
-		highlighter.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+		XSSFCellStyle error_highlighter = workbook.createCellStyle();
+		XSSFCellStyle warning_highlighter = workbook.createCellStyle();
+		
+		warning_highlighter.setFillForegroundColor(xyellow);
+		warning_highlighter.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+		error_highlighter.setFillForegroundColor(xred);
+		error_highlighter.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+		
+		fillWarnings(p.getWarnings(), row, warning_highlighter);
+		fillErrors(p.getErrors(), row, error_highlighter);
+	}
 
-		for (PlanError error : p.getErrors()) {
+	public static void fillErrors(ArrayList<PlanError> errors, Row row, XSSFCellStyle highlighter) {
+		for (PlanError error : errors) {
 			int location = 0;
+			Cell cell;
 			AttributeType att = error.getAttribute();
+			AttributeType secondAtt = error.getSecondAttribute();
 			RateType rateType = error.getType();
 
 			if (att == AttributeType.NONE) {
@@ -178,6 +273,33 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 					location += 48;
 				}
 
+				cell = row.getCell(location);
+				cell.setCellStyle(highlighter);
+				
+				if(secondAtt != null){
+					location = Attribute.attributes.indexOf(secondAtt);
+					cell = row.getCell(location);
+					cell.setCellStyle(highlighter);
+				}
+				
+				if(rateType == RateType.BOTH){
+					location += 48;
+					cell = row.getCell(location);
+					cell.setCellStyle(highlighter);
+				}
+			}
+		}
+	}
+
+	public static void fillWarnings(ArrayList<PlanWarning> warnings, Row row, XSSFCellStyle highlighter) {
+		for (PlanWarning warning : warnings) {
+			int location = 0;
+			Cell cell;
+			Warning warningType = warning.getWarningType();
+			AttributeType att = warning.getAttributeType();
+
+			if (warningType != Warning.PLAN_TYPE_NOT_FOUND) {
+				location = Attribute.attributes.indexOf(att);
 				cell = row.getCell(location);
 				cell.setCellStyle(highlighter);
 			}
@@ -196,8 +318,8 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 		Sheet sheet;
 		for (Report<MedicalPlan> r : reports) {
 			XSSFWorkbook workbook = new XSSFWorkbook();
-			if (r.getTotalErrorSize() == 0) {
-				log.append(String.format("All tests passed for %s.\nNo output file produced.", r.getFilename()));
+			if (r.getTotalErrorSize()==0 & r.getTotalWarningSize() == 0) {
+				log.append(String.format("All tests passed for %s.\nNo output file produced.\n", r.getFilename()));
 				continue;
 			}
 			sheet = workbook.createSheet("Error Log");
@@ -210,10 +332,12 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 			cell = row.createCell(col_index++);
 			cell.setCellValue("Error Type");
 			cell = row.createCell(col_index++);
+			cell.setCellValue("Warning Type");
+			cell = row.createCell(col_index++);
 			cell.setCellValue("Description");
 			for (MedicalPlan p : r.getPlans()) {
 				boolean alreadyFilledPlanName = false;
-				if (!p.hasErrors()) {
+				if (!p.hasErrors() & !p.hasWarnings()) {
 					continue;
 				}
 				col_index = 0;
@@ -227,13 +351,27 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 					cell = row.createCell(col_index++);
 					cell.setCellValue(e.getErrorType());
 
-					cell = row.createCell(col_index);
+					cell = row.createCell(++col_index);
 					cell.setCellValue(e.getErrorMessage());
+					col_index = 0;
+				}
+				for (PlanWarning w : p.getWarnings()) {
+					row = sheet.createRow(++row_index);
+					cell = row.createCell(col_index++);
+					if (!alreadyFilledPlanName) {
+						cell.setCellValue(p.product_name);
+					}
+					alreadyFilledPlanName = true;
+					cell = row.createCell(++col_index);
+					cell.setCellValue(w.getWarningType().toString());
+
+					cell = row.createCell(++col_index);
+					cell.setCellValue(w.getWarningMessage());
 					col_index = 0;
 				}
 			}
 
-			for (int x = 0; x < row.getPhysicalNumberOfCells(); x++) {
+			for (int x = 0; x < 5; x++) {
 				sheet.autoSizeColumn(x);
 			}
 
@@ -245,6 +383,7 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 	@Override
 	public void populateErrorSummary() throws IOException {
 		for (Map.Entry<Report<MedicalPlan>, XSSFWorkbook> entry : workbookMap.entrySet()) {
+			HashMap<String, Integer> attributeIndexMap = entry.getKey().attributeIndexMap;
 			XSSFWorkbook workbook = entry.getValue();
 			Sheet sheet = workbook.createSheet("Error Summary");
 
@@ -253,27 +392,40 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 			Row row = sheet.createRow(0);
 			row = sheet.createRow(row_index++);
 			Cell cell;
-			
-			for(Attribute.AttributeType att : Attribute.attributes){
-				if(att == AttributeType.NONE){
-					continue;
+
+			for (Attribute.AttributeType att : Attribute.attributes) {
+				String attString = att.toString().toLowerCase();
+				if (attributeIndexMap.containsKey(attString)) {
+					cell = row.createCell(col_index++);
+					cell.setCellValue(attString);
 				}
+			}
+
+			for (int i = 32; i < Attribute.attributes.size() - 1; i++) {
 				cell = row.createCell(col_index++);
-				cell.setCellValue(att.toString().toLowerCase());
+				cell.setCellValue(Attribute.attributes.get(i).toString().toLowerCase());
 			}
 			
-			for(MedicalPlan plan : entry.getKey().getPlans()){
-				if(!plan.hasErrors()){
+			if(entry.getKey().hasTobbacoRates){
+				col_index++;
+				for (int i = 32; i < Attribute.attributes.size() - 1; i++) {
+					cell = row.createCell(col_index++);
+					cell.setCellValue(Attribute.attributes.get(i).toString().toLowerCase());
+				}
+			}
+
+			for (MedicalPlan plan : entry.getKey().getPlans()) {
+				if (!plan.hasErrors() & !plan.hasWarnings()) {
 					continue;
 				}
 				row = sheet.createRow(row_index++);
-				populateRow(workbook, sheet, row, plan);
+				populateRow(workbook, attributeIndexMap, sheet, row, plan);
 			}
-			
+
 			for (int x = 0; x < row.getPhysicalNumberOfCells(); x++) {
 				sheet.autoSizeColumn(x);
 			}
-			
+
 		}
 		log.append("Finished populating error summary.\n");
 	}
@@ -284,14 +436,13 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 			XSSFWorkbook workbook = entry.getValue();
 			Sheet sheet = workbook.createSheet("Statistics Summary");
 
-			
 			int row_index = 0;
 			int col_index = 0;
 			Row row = sheet.createRow(0);
 			row = sheet.createRow(row_index);
 			Cell cell = row.createCell(col_index);
 			cell.setCellValue("Non-Tobacco Rates");
-			
+
 			row_index = 1;
 			row = sheet.createRow(row_index);
 			cell = row.createCell(col_index++);
@@ -308,13 +459,13 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 			cell.setCellValue("Std Dev");
 			cell = row.createCell(col_index++);
 			cell.setCellValue("CV");
-			
-			if(entry.getKey().hasTobbacoRates){
+
+			if (entry.getKey().hasTobbacoRates) {
 				row_index = 0;
 				row = sheet.getRow(row_index);
 				cell = row.createCell(col_index);
 				cell.setCellValue("Non-Tobacco Rates");
-				
+
 				row_index = 1;
 				row = sheet.getRow(row_index);
 				cell = row.createCell(col_index++);
@@ -349,9 +500,9 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 				cell = row.createCell(col_index++);
 				cell.setCellValue(String.format("%.2f", plan.non_tobacco_stats.getStdDev()));
 				cell = row.createCell(col_index++);
-				cell.setCellValue(String.format("%.2f", 100*plan.non_tobacco_stats.getCV()) + "%");
+				cell.setCellValue(String.format("%.2f", 100 * plan.non_tobacco_stats.getCV()) + "%");
 			}
-			
+
 			for (int x = 0; x < row.getPhysicalNumberOfCells(); x++) {
 				sheet.autoSizeColumn(x);
 			}

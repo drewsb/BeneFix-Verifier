@@ -35,6 +35,7 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 	ArrayList<MedicalPlan> plans;
 	ArrayList<PlanStatistics> planStats;
 	ArrayList<PlanWarning> warnings;
+	HashMap<String, Integer> attributeIndexMap;
 
 	String[] ageBands = { "0-18", "19-20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33",
 			"34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51",
@@ -54,6 +55,9 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 			System.out.println(plan.product_name);
 			for (Map.Entry<String, Double> rateEntry : plan.non_tobacco_diff_dict.entrySet()) {
 				if (rateEntry.getValue() < 0) {
+					System.out.println(rateEntry.getKey());
+					System.out.println(rateEntry.getValue());
+
 					String fullKey = Attribute.getFullAge(rateEntry.getKey()).toUpperCase();
 					AttributeType att = Attribute.AttributeType.valueOf(fullKey);
 					PlanError newError = new PlanError(PlanError.Error.MONOTONOCITY, att,
@@ -94,24 +98,187 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 		return;
 	}
 
+	/*
+	 * The program then verifies that tobacco rates > non-tobacco rates, family
+	 * rates = 2*individual rates, and oon rates > normal rates
+	 */
+	@Override
+	public void verifyIncrements() {
+		for (MedicalPlan plan : plans) {
+			if (!plan.deductible_indiv.isEmpty()) {
+				/*
+				 * getValue() method retrieves a value from the attribute data
+				 * returns -1.0 if format is not recognized, -2 if the value if
+				 * n/a
+				 */
+				Double ded_indiv = Formatter.getValue(plan.deductible_indiv);
+				Double ded_family = Formatter.getValue(plan.deductible_family);
+				Double oon_ded_indiv = Formatter.getValue(plan.oon_deductible_indiv);
+				Double oon_ded_family = Formatter.getValue(plan.oon_deductible_family);
+				Double oop_max_indiv = Formatter.getValue(plan.oop_max_indiv);
+				Double oop_max_family = Formatter.getValue(plan.oop_max_family);
+				Double oon_oop_max_indiv = Formatter.getValue(plan.oon_oop_max_indiv);
+				Double oon_oop_max_family = Formatter.getValue(plan.oon_oop_max_family);
+
+				// Check if the formats of the above attributes are recognized
+				if (ded_indiv == -1.0) {
+					PlanWarning warning = new PlanWarning(PlanWarning.Warning.UNRECOGNIZED_FORMAT,
+							Attribute.AttributeType.DEDUCTIBLE_INDIV, null, plan.deductible_indiv, "");
+					plan.addWarning(warning);
+				}
+
+				if (ded_family == -1.0) {
+					PlanWarning warning = new PlanWarning(PlanWarning.Warning.UNRECOGNIZED_FORMAT,
+							Attribute.AttributeType.DEDUCTIBLE_FAMILY, null, plan.deductible_family, "");
+					plan.addWarning(warning);
+				}
+
+				if (oon_ded_indiv == -1.0) {
+					PlanWarning warning = new PlanWarning(PlanWarning.Warning.UNRECOGNIZED_FORMAT,
+							Attribute.AttributeType.OON_DEDUCTIBLE_INDIVIDUAL, null, plan.oon_deductible_indiv, "");
+					plan.addWarning(warning);
+				}
+
+				if (oon_ded_family == -1.0) {
+					PlanWarning warning = new PlanWarning(PlanWarning.Warning.UNRECOGNIZED_FORMAT,
+							Attribute.AttributeType.OON_DEDUCTIBLE_FAMILY, null, plan.oon_deductible_family, "");
+					plan.addWarning(warning);
+				}
+
+				if (oop_max_indiv == -1.0) {
+					PlanWarning warning = new PlanWarning(PlanWarning.Warning.UNRECOGNIZED_FORMAT,
+							Attribute.AttributeType.OOP_MAX_INDIV, null, plan.oop_max_indiv, "");
+					plan.addWarning(warning);
+				}
+
+				if (oop_max_family == -1.0) {
+					PlanWarning warning = new PlanWarning(PlanWarning.Warning.UNRECOGNIZED_FORMAT,
+							Attribute.AttributeType.OOP_MAX_FAMILY, null, plan.oop_max_family, "");
+					plan.addWarning(warning);
+				}
+
+				if (oon_oop_max_indiv == -1.0) {
+					PlanWarning warning = new PlanWarning(PlanWarning.Warning.UNRECOGNIZED_FORMAT,
+							Attribute.AttributeType.OON_OOP_MAX_INDIVIDUAL, null, plan.oon_oop_max_indiv, "");
+					plan.addWarning(warning);
+				}
+
+				if (oon_oop_max_family == -1.0) {
+					PlanWarning warning = new PlanWarning(PlanWarning.Warning.UNRECOGNIZED_FORMAT,
+							Attribute.AttributeType.OON_OOP_MAX_FAMILY, null, plan.oon_oop_max_family, "");
+					plan.addWarning(warning);
+				}
+
+				// Check if all family rates are twice the individual rates
+				if (ded_indiv >= 0 & ded_family >= 0 & ded_family < ded_indiv) {
+					PlanError newError = new PlanError(PlanError.Error.INDIV_FAMILY_INCREMENT,
+							Attribute.AttributeType.DEDUCTIBLE_INDIV, null, plan.deductible_indiv, "");
+					newError.addSecondAttribute(Attribute.AttributeType.DEDUCTIBLE_FAMILY);
+					newError.addSecondIncorrectVal(plan.deductible_family);
+					plan.addError(newError);
+				}
+
+				if (oon_ded_indiv >= 0 & oon_ded_family >= 0 & oon_ded_family < oon_ded_indiv) {
+					PlanError newError = new PlanError(PlanError.Error.INDIV_FAMILY_INCREMENT,
+							Attribute.AttributeType.OON_DEDUCTIBLE_INDIVIDUAL, null, plan.oon_deductible_indiv, "");
+					newError.addSecondAttribute(Attribute.AttributeType.OON_DEDUCTIBLE_FAMILY);
+					newError.addSecondIncorrectVal(plan.oon_deductible_family);
+					plan.addError(newError);
+				}
+
+				if (oop_max_indiv >= 0 & oop_max_family >= 0 & oop_max_family < oop_max_indiv) {
+					PlanError newError = new PlanError(PlanError.Error.INDIV_FAMILY_INCREMENT,
+							Attribute.AttributeType.OOP_MAX_INDIV, null, plan.oop_max_indiv, "");
+					newError.addSecondAttribute(Attribute.AttributeType.OOP_MAX_FAMILY);
+					newError.addSecondIncorrectVal(plan.oop_max_family);
+					plan.addError(newError);
+				}
+
+				if (oon_oop_max_indiv >= 0 & oon_oop_max_family >= 0 & oon_oop_max_family < oon_oop_max_indiv) {
+					PlanError newError = new PlanError(PlanError.Error.INDIV_FAMILY_INCREMENT,
+							Attribute.AttributeType.OON_OOP_MAX_INDIVIDUAL, null, plan.oon_oop_max_indiv, "");
+					newError.addSecondAttribute(Attribute.AttributeType.OON_OOP_MAX_FAMILY);
+					newError.addSecondIncorrectVal(plan.oon_oop_max_family);
+					plan.addError(newError);
+				}
+
+				// Check if all out-of-network rates are greater than in-network
+				// rates
+				if (ded_indiv >= 0 & oon_ded_indiv >= 0 & oon_ded_indiv < ded_indiv) {
+					PlanError newError = new PlanError(PlanError.Error.OON_INCREMENT,
+							Attribute.AttributeType.DEDUCTIBLE_INDIV, null, plan.deductible_indiv, "");
+					newError.addSecondAttribute(Attribute.AttributeType.OON_DEDUCTIBLE_INDIVIDUAL);
+					newError.addSecondIncorrectVal(plan.oon_deductible_indiv);
+					plan.addError(newError);
+				}
+
+				if (ded_family >= 0 & oon_ded_family >= 0 & oon_ded_family < ded_family) {
+					PlanError newError = new PlanError(PlanError.Error.OON_INCREMENT,
+							Attribute.AttributeType.DEDUCTIBLE_FAMILY, null, plan.deductible_family, "");
+					newError.addSecondAttribute(Attribute.AttributeType.OON_DEDUCTIBLE_FAMILY);
+					newError.addSecondIncorrectVal(plan.oon_deductible_family);
+					plan.addError(newError);
+				}
+
+				if (oon_oop_max_indiv >= 0 & oop_max_indiv >= 0 & oon_oop_max_indiv < oop_max_indiv) {
+					PlanError newError = new PlanError(PlanError.Error.OON_INCREMENT,
+							Attribute.AttributeType.OOP_MAX_INDIV, null, plan.oop_max_indiv, "");
+					newError.addSecondAttribute(Attribute.AttributeType.OON_OOP_MAX_INDIVIDUAL);
+					newError.addSecondIncorrectVal(plan.oon_oop_max_indiv);
+					plan.addError(newError);
+				}
+
+				if (oon_oop_max_family >= 0 & oop_max_family >= 0 & oon_oop_max_family < oop_max_family) {
+					PlanError newError = new PlanError(PlanError.Error.OON_INCREMENT,
+							Attribute.AttributeType.OOP_MAX_FAMILY, null, plan.oop_max_family, "");
+					newError.addSecondAttribute(Attribute.AttributeType.OON_OOP_MAX_FAMILY);
+					newError.addSecondIncorrectVal(plan.oon_oop_max_family);
+					plan.addError(newError);
+				}
+			}
+			/*
+			 * If plan has tobacco rates, iterate through both rate dictionaries
+			 * to ensure tobacco rates > non-tobacco rates
+			 */
+
+			if (plan.hasTobaccoRates()) {
+				for (Map.Entry<String, Double> rateEntry : plan.tobacco_diff_dict.entrySet()) {
+					if (plan.non_tobacco_dict.get(rateEntry.getKey()) > rateEntry.getValue()) {
+						String fullKey = Attribute.getFullAge(rateEntry.getKey()).toUpperCase();
+						AttributeType att = Attribute.AttributeType.valueOf(fullKey);
+
+						PlanError newError = new PlanError(PlanError.Error.TOBACCO_INCREMENT, att, RateType.BOTH,
+								plan.non_tobacco_dict.get(rateEntry.getKey()).toString(), "");
+						newError.addSecondIncorrectVal(rateEntry.getValue().toString());
+						plan.addError(newError);
+					}
+				}
+			}
+		}
+
+	}
+
 	@Override
 	public void verifyCV() {
 		for (int i = 1; i < plans.size(); i++) {
 			Double firstVal = plans.get(i - 1).non_tobacco_stats.getCV();
 			Double secondVal = plans.get(i).non_tobacco_stats.getCV();
 			if (Double.compare(firstVal, secondVal) != 0) {
+
 				PlanError newError = new PlanError(PlanError.Error.CV, Attribute.AttributeType.NONE,
-						PlanError.RateType.NON_TOBACCO, firstVal.toString(), secondVal.toString());
+						PlanError.RateType.NON_TOBACCO, secondVal.toString(), firstVal.toString());
 				plans.get(i).addError(newError);
+				i++;
 			}
 
 			if (plans.get(i).hasTobaccoRates()) {
 				Double firstTobVal = plans.get(i - 1).tobacco_stats.getCV();
 				Double secondTobVal = plans.get(i).tobacco_stats.getCV();
-				if (Double.compare(firstVal, secondVal) != 0) {
+				if (Double.compare(firstTobVal, secondTobVal) != 0) {
 					PlanError newError = new PlanError(PlanError.Error.CV, Attribute.AttributeType.NONE,
-							PlanError.RateType.TOBACCO, firstTobVal.toString(), secondTobVal.toString());
+							PlanError.RateType.TOBACCO, secondTobVal.toString(), firstTobVal.toString());
 					plans.get(i).addError(newError);
+					i++;
 				}
 			}
 
@@ -122,40 +289,59 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 	@Override
 	public void verifyPDFMapping(MedicalPlan plan) throws IOException {
 		PlanError new_error;
+		URL plan_url = null;
 		if (plan.plan_pdf_url == null) {
 			return;
 		}
 		File file = new File("tempFile");
-		URL plan_url = plan.plan_pdf_url;
+		try {
+			plan_url = new URL(plan.plan_pdf_url);
+		} catch (MalformedURLException e) {
+			PlanWarning new_warning = new PlanWarning(Warning.INVALID_PDF_LINK, AttributeType.PLAN_PDF_FILE_URL,
+					null, plan.plan_pdf_url, "");
+			plan.addWarning(new_warning);
+		}
 		System.out.println(plan_url.toString());
-		FileUtils.copyURLToFile(plan_url, file, 1000000, 1000000);
+		while (true) {
+			try {
+				FileUtils.copyURLToFile(plan_url, file, 1000000, 1000000);
+				break;
+			} catch (IOException e) {
+				System.out.println(e.getMessage());
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		}
 		PDFManager pdfManager = new PDFManager(file);
 		String text = pdfManager.ToText();
 		String[] tokens = text.split("[\\s\\r\\n]+");
 
 		Parser parser = new Parser(tokens, carrier);
 		Product_Name p_name = new Product_Name(plan.product_name);
-		
-		
-		if(p_name.metal == Metal.None){
-			PlanWarning new_warning = new PlanWarning(PlanWarning.Warning.METAL_NOT_FOUND, Attribute.AttributeType.PRODUCT_NAME, null,
-					p_name.original_name, "");
-			warnings.add(new_warning);
+
+		if (p_name.metal == Metal.None) {
+			PlanWarning new_warning = new PlanWarning(PlanWarning.Warning.METAL_NOT_FOUND,
+					Attribute.AttributeType.PRODUCT_NAME, null, p_name.original_name, "");
+			plan.addWarning(new_warning);
 		}
-		
-		if(p_name.plan == Product_Name.Plan.None){
-			PlanWarning new_warning = new PlanWarning(PlanWarning.Warning.PLAN_TYPE_NOT_FOUND, Attribute.AttributeType.PRODUCT_NAME, null,
-					p_name.original_name, "");
-			warnings.add(new_warning);
+
+		if (p_name.plan == Product_Name.Plan.None) {
+			PlanWarning new_warning = new PlanWarning(PlanWarning.Warning.PLAN_TYPE_NOT_FOUND,
+					Attribute.AttributeType.PRODUCT_NAME, null, p_name.original_name, "");
+			plan.addWarning(new_warning);
 		}
-		
+
 		if (!parser.findProductName(p_name.original_name)) {
 			if (!parser.findMetal(p_name.metal) & p_name.metal != Metal.None) {
-				new_error = new PlanError(PlanError.Error.PDF_METAL_MISMATCH, Attribute.AttributeType.PRODUCT_NAME, null,
-						p_name.metal.toString(), "");
+				new_error = new PlanError(PlanError.Error.PDF_METAL_MISMATCH, Attribute.AttributeType.PRODUCT_NAME,
+						null, p_name.metal.toString(), "");
 				plan.addError(new_error);
 			}
-			if (!parser.findPlan(p_name.plan)  & p_name.plan != Product_Name.Plan.None) {
+			if (!parser.findPlan(p_name.plan) & p_name.plan != Product_Name.Plan.None) {
 				new_error = new PlanError(PlanError.Error.PDF_PLAN_MISMATCH, Attribute.AttributeType.PRODUCT_NAME, null,
 						p_name.plan.toString(), "");
 				plan.addError(new_error);
@@ -181,10 +367,11 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 		int tob_col_index;
 
 		Row r = sheet.getRow(0);
-		HashMap<String, Integer> attributeIndexMap = getAttributeIndexMap(r);
-		verifyIndexMap(attributeIndexMap);
+		computeAttributeIndexMap(r);
 
 		while (row_index < numRows - 1) {
+
+			ArrayList<PlanWarning> planWarnings = new ArrayList<PlanWarning>();
 			col_index = 0;
 			// System.out.println(row_index);
 
@@ -215,7 +402,7 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 			String outpatient_diagnostic_x_ray = "";
 			String outpatient_complex_imaging = "";
 			String physical_occupational_therapy = "";
-			URL plan_pdf_file_url = null;
+			String plan_pdf_file_url = "";
 			String state = "";
 			String group_rating_area = "";
 			String service_zones = "";
@@ -393,7 +580,7 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 
 			if (attributeIndexMap.containsKey("plan_pdf_file_url")) {
 				cell = r.getCell(attributeIndexMap.get("plan_pdf_file_url"));
-				plan_pdf_file_url = new URL(getCellValue(cell));
+				plan_pdf_file_url = getCellValue(cell);
 			}
 			col_index = attributeIndexMap.get("0-18");
 
@@ -455,12 +642,16 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 					plan_pdf_file_url, state, group_rating_area, service_zones, non_tobacco_dict, non_tobacco_diff_dict,
 					tobacco_dict, tobacco_diff_dict);
 
+			for (PlanWarning w : planWarnings) {
+				new_plan.addWarning(w);
+			}
+
 			new_plan.computeStatistics();
 			plans.add(new_plan);
 		}
 	}
 
-	public HashMap<String, Integer> getAttributeIndexMap(Row r) {
+	public void computeAttributeIndexMap(Row r) {
 		HashMap<String, Integer> indexMap = new HashMap<String, Integer>();
 		int index = 0;
 		Cell cell = r.getCell(index);
@@ -481,7 +672,11 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 				break;
 			}
 		}
-		return indexMap;
+		attributeIndexMap = indexMap;
+	}
+
+	public HashMap<String, Integer> getAttributeIndexMap() {
+		return attributeIndexMap;
 	}
 
 	public void verifyIndexMap(HashMap<String, Integer> attributeIndexMap) {

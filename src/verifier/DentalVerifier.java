@@ -55,4 +55,16 @@ public class DentalVerifier implements Verifier<DentalPlan> {
 		return null;
 	}
 
+	@Override
+	public HashMap<String, Integer> getAttributeIndexMap() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void verifyIncrements() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -56,31 +56,56 @@ public class Formatter {
 	public static Boolean isDollarValue(String s) {
 		return s.contains("$");
 	}
-	
-	public static String getPercentage(String s){
+
+	public static String getPercentage(String s) {
 		String[] arr = s.split("\\s");
-		for(String r : arr){
-			if(isPercentage(r)){
+		for (String r : arr) {
+			if (isPercentage(r)) {
 				return r;
 			}
 		}
 		return "";
 	}
-	
-	public static void printDictionary(HashMap<String, Double>  map){
+
+	public static Double getValue(String s) throws NumberFormatException {
+		if(s.toLowerCase().equals("n/a")){
+			return -2.0;
+		}
+		Double output = -1.0;
+		s = s.replaceAll("[$,]", "");
+		try {
+			output = Double.parseDouble(s);
+			return output;
+		} catch (NumberFormatException e) {
+		}
+		String[] tokens = s.split("\\s");
+		for (String r : tokens) {
+			try {
+				output = Math.max(Double.parseDouble(r), output);
+			} catch (NumberFormatException e) {
+			}
+		}
+		return output;
+	}
+
+	public static void printDictionary(HashMap<String, Double> map) {
 		for (Map.Entry<String, Double> entry : map.entrySet()) {
 			System.out.printf("Key: %s\n", entry.getKey());
 			System.out.printf("Value: %s\n\n", entry.getValue());
 		}
 
 	}
-	
-	public static String formatRatingArea(String r){
-		String[] delims = {"Rating Area ", "Area "};
+
+	public static String formatRatingArea(String r) {
+		String[] delims = { "Rating Area ", "Area " };
 		r = r.replaceAll(", ", "/");
 		r = r.replaceAll(",", "/");
 		r = removeStrings(r, delims);
 		return r;
+	}
+
+	public static String capitalize(String s) {
+		return Character.toUpperCase(s.charAt(0)) + s.toLowerCase().substring(1);
 	}
 
 }
