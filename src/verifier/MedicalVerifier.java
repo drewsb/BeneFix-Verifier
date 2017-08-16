@@ -4,18 +4,14 @@ import java.io.*;
 
 import java.net.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.TrueFileFilter;
 
 import parser.*;
 import components.*;
@@ -27,20 +23,43 @@ import plan.PlanError.*;
 import names.*;
 import names.Product_Name.Metal;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class MedicalVerifier.
+ */
 public class MedicalVerifier implements Verifier<MedicalPlan> {
 
+	/** The workbook. */
 	final XSSFWorkbook workbook;
+
+	/** The carrier. */
 	Carrier carrier;
 
+	/** The plans. */
 	ArrayList<MedicalPlan> plans;
+
+	/** The plan stats. */
 	ArrayList<PlanStatistics> planStats;
+
+	/** The warnings. */
 	ArrayList<PlanWarning> warnings;
+
+	/** The attribute index map. */
 	HashMap<String, Integer> attributeIndexMap;
 
+	/** The age bands. */
 	String[] ageBands = { "0-18", "19-20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33",
 			"34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51",
 			"52", "53", "54", "55", "56", "57", "58", "59", "60", "61", "62", "63", "64", "65+" };
 
+	/**
+	 * Instantiates a new medical verifier.
+	 *
+	 * @param workbook
+	 *            the workbook
+	 * @param carrier
+	 *            the carrier
+	 */
 	public MedicalVerifier(XSSFWorkbook workbook, Carrier carrier) {
 		super();
 		this.workbook = workbook;
@@ -49,6 +68,11 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 		warnings = new ArrayList<PlanWarning>();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see verifier.Verifier#verifyMonotonicity()
+	 */
 	@Override
 	public void verifyMonotonicity() {
 		for (MedicalPlan plan : plans) {
@@ -99,6 +123,11 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 	}
 
 	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see verifier.Verifier#verifyIncrements()
+	 */
+	/*
 	 * The program then verifies that tobacco rates > non-tobacco rates, family
 	 * rates = 2*individual rates, and oon rates > normal rates
 	 */
@@ -119,6 +148,9 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 				Double oop_max_family = Formatter.getValue(plan.oop_max_family);
 				Double oon_oop_max_indiv = Formatter.getValue(plan.oon_oop_max_indiv);
 				Double oon_oop_max_family = Formatter.getValue(plan.oon_oop_max_family);
+
+				System.out.println(oon_ded_indiv);
+				System.out.println(plan.oon_deductible_indiv);
 
 				// Check if the formats of the above attributes are recognized
 				if (ded_indiv == -1.0) {
@@ -169,7 +201,7 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 					plan.addWarning(warning);
 				}
 
-				// Check if all family rates are twice the individual rates
+				// Check if all family rates are less than the individual rates
 				if (ded_indiv >= 0 & ded_family >= 0 & ded_family < ded_indiv) {
 					PlanError newError = new PlanError(PlanError.Error.INDIV_FAMILY_INCREMENT,
 							Attribute.AttributeType.DEDUCTIBLE_INDIV, null, plan.deductible_indiv, "");
@@ -243,14 +275,17 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 
 			if (plan.hasTobaccoRates()) {
 				for (Map.Entry<String, Double> rateEntry : plan.tobacco_diff_dict.entrySet()) {
-					if (plan.non_tobacco_dict.get(rateEntry.getKey()) > rateEntry.getValue()) {
-						String fullKey = Attribute.getFullAge(rateEntry.getKey()).toUpperCase();
-						AttributeType att = Attribute.AttributeType.valueOf(fullKey);
+					System.out.println(rateEntry.getKey());
+					if (plan.non_tobacco_dict.containsKey(rateEntry.getKey())) {
+						if (plan.non_tobacco_dict.get(rateEntry.getKey()) > rateEntry.getValue()) {
+							String fullKey = Attribute.getFullAge(rateEntry.getKey()).toUpperCase();
+							AttributeType att = Attribute.AttributeType.valueOf(fullKey);
 
-						PlanError newError = new PlanError(PlanError.Error.TOBACCO_INCREMENT, att, RateType.BOTH,
-								plan.non_tobacco_dict.get(rateEntry.getKey()).toString(), "");
-						newError.addSecondIncorrectVal(rateEntry.getValue().toString());
-						plan.addError(newError);
+							PlanError newError = new PlanError(PlanError.Error.TOBACCO_INCREMENT, att, RateType.BOTH,
+									plan.non_tobacco_dict.get(rateEntry.getKey()).toString(), "");
+							newError.addSecondIncorrectVal(rateEntry.getValue().toString());
+							plan.addError(newError);
+						}
 					}
 				}
 			}
@@ -258,6 +293,11 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see verifier.Verifier#verifyCV()
+	 */
 	@Override
 	public void verifyCV() {
 		for (int i = 1; i < plans.size(); i++) {
@@ -286,6 +326,11 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 		return;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see verifier.Verifier#verifyPDFMapping(plan.Plan)
+	 */
 	@Override
 	public void verifyPDFMapping(MedicalPlan plan) throws IOException {
 		PlanError new_error;
@@ -297,16 +342,20 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 		try {
 			plan_url = new URL(plan.plan_pdf_url);
 		} catch (MalformedURLException e) {
-			PlanWarning new_warning = new PlanWarning(Warning.INVALID_PDF_LINK, AttributeType.PLAN_PDF_FILE_URL,
-					null, plan.plan_pdf_url, "");
+			PlanWarning new_warning = new PlanWarning(Warning.INVALID_PDF_LINK, AttributeType.PLAN_PDF_FILE_URL, null,
+					plan.plan_pdf_url, "");
 			plan.addWarning(new_warning);
+			return;
 		}
+		int max_tries = 3;
+		int index = 0;
 		System.out.println(plan_url.toString());
-		while (true) {
+		while (true & index < max_tries) {
 			try {
 				FileUtils.copyURLToFile(plan_url, file, 1000000, 1000000);
 				break;
 			} catch (IOException e) {
+				index++;
 				System.out.println(e.getMessage());
 				try {
 					Thread.sleep(1000);
@@ -315,6 +364,12 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 					e1.printStackTrace();
 				}
 			}
+		}
+		if(index == 5){
+			PlanWarning new_warning = new PlanWarning(Warning.INVALID_PDF_LINK, AttributeType.PLAN_PDF_FILE_URL, null,
+					plan.plan_pdf_url, "");
+			plan.addWarning(new_warning);
+			return;
 		}
 		PDFManager pdfManager = new PDFManager(file);
 		String text = pdfManager.ToText();
@@ -350,10 +405,20 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 		return;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see verifier.Verifier#getPlans()
+	 */
 	public ArrayList<MedicalPlan> getPlans() {
 		return plans;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see verifier.Verifier#generatePlans()
+	 */
 	public void generatePlans() throws MalformedURLException {
 		Sheet sheet = workbook.getSheetAt(0);
 
@@ -364,10 +429,8 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 		int numRows = getNumRows(sheet);
 		int row_index = 1;
 		int col_index;
-		int tob_col_index;
 
-		Row r = sheet.getRow(0);
-		computeAttributeIndexMap(r);
+		computeAttributeIndexMap(sheet);
 
 		while (row_index < numRows - 1) {
 
@@ -412,7 +475,7 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 			HashMap<String, Double> tobacco_dict = new HashMap<String, Double>();
 			HashMap<String, Double> tobacco_diff_dict = new HashMap<String, Double>();
 
-			r = sheet.getRow(row_index++);
+			Row r = sheet.getRow(row_index++);
 
 			if (attributeIndexMap.containsKey("carrier")) {
 				cell = r.getCell(attributeIndexMap.get("carrier"));
@@ -585,20 +648,34 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 			col_index = attributeIndexMap.get("0-18");
 
 			cell = r.getCell(col_index++);
-			firstVal = cell.getNumericCellValue();
-			non_tobacco_dict.put(ageBands[0], firstVal);
+			if (cell != null) {
+				firstVal = cell.getNumericCellValue();
+				non_tobacco_dict.put(ageBands[0], firstVal);
+			}
 
 			int base_index = col_index - 1;
 			int temp_index = col_index + 46;
 
+			System.out.println(product_name);
 			while (col_index < temp_index) {
+				System.out.println(col_index);
 				cell = r.getCell(col_index - 1);
-				firstVal = cell.getNumericCellValue();
+				if (cell != null) {
+					firstVal = cell.getNumericCellValue();
+				} else {
+					firstVal = 0.0;
+				}
 				cell = r.getCell(col_index);
-				secondVal = cell.getNumericCellValue();
+				if (cell != null) {
+					secondVal = cell.getNumericCellValue();
+				} else {
+					secondVal = -1.0;
+				}
 
-				non_tobacco_dict.put(ageBands[col_index - base_index], secondVal);
-				non_tobacco_diff_dict.put(ageBands[col_index - base_index], secondVal - firstVal);
+				if (secondVal != -1.0) {
+					non_tobacco_dict.put(ageBands[col_index - base_index], secondVal);
+					non_tobacco_diff_dict.put(ageBands[col_index - base_index], secondVal - firstVal);
+				}
 
 				col_index++;
 			}
@@ -613,19 +690,31 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 			if (hasTobaccoRates) {
 				col_index = attributeIndexMap.get("t-0-18");
 				cell = r.getCell(col_index);
-				firstVal = cell.getNumericCellValue();
-				tobacco_dict.put(ageBands[0], firstVal);
+				if (cell != null) {
+					firstVal = cell.getNumericCellValue();
+					tobacco_dict.put(ageBands[0], firstVal);
+				}
 				base_index = col_index - 1;
 				temp_index = col_index + 46;
 
 				while (col_index < temp_index) {
 					cell = r.getCell(col_index - 1);
-					firstVal = cell.getNumericCellValue();
-					cell = r.getCell(col_index);
-					secondVal = cell.getNumericCellValue();
+					if (cell != null) {
+						firstVal = cell.getNumericCellValue();
+					} else {
+						firstVal = 0.0;
+					}
+					if (cell != null) {
+						cell = r.getCell(col_index);
+						secondVal = cell.getNumericCellValue();
+					} else {
+						secondVal = -1.0;
+					}
 
-					tobacco_dict.put(ageBands[col_index - base_index], secondVal);
-					tobacco_diff_dict.put(ageBands[col_index - base_index], secondVal - firstVal);
+					if (secondVal != -1.0) {
+						tobacco_dict.put(ageBands[col_index - base_index], secondVal);
+						tobacco_diff_dict.put(ageBands[col_index - base_index], secondVal - firstVal);
+					}
 
 					col_index++;
 				}
@@ -651,7 +740,15 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 		}
 	}
 
-	public void computeAttributeIndexMap(Row r) {
+	/**
+	 * Compute attribute index map.
+	 *
+	 * @param r
+	 *            the r
+	 */
+	public void computeAttributeIndexMap(Sheet sheet) {
+		Row r = sheet.getRow(0);
+		Row secondRow = sheet.getRow(1);
 		HashMap<String, Integer> indexMap = new HashMap<String, Integer>();
 		int index = 0;
 		Cell cell = r.getCell(index);
@@ -665,20 +762,30 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 		index += 47;
 		int temp_index = index + 5;
 		while (index < temp_index) {
-			cell = r.getCell(index++);
-			header = getCellValue(cell);
-			if (header.equals("zero_eighteen")) {
-				indexMap.put("t-" + Attribute.ageReverseBandMap.get(header), index);
+			cell = secondRow.getCell(index++);
+			if (cell != null) {
+				indexMap.put("t-" + Attribute.ageReverseBandMap.get("0-18"), index);
 				break;
 			}
 		}
 		attributeIndexMap = indexMap;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see verifier.Verifier#getAttributeIndexMap()
+	 */
 	public HashMap<String, Integer> getAttributeIndexMap() {
 		return attributeIndexMap;
 	}
 
+	/**
+	 * Verify index map.
+	 *
+	 * @param attributeIndexMap
+	 *            the attribute index map
+	 */
 	public void verifyIndexMap(HashMap<String, Integer> attributeIndexMap) {
 		PlanWarning new_warning;
 		if (!attributeIndexMap.containsKey("carrier_id")) {
@@ -850,10 +957,24 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see verifier.Verifier#getWarnings()
+	 */
 	public ArrayList<PlanWarning> getWarnings() {
 		return warnings;
 	}
 
+	/**
+	 * Gets the parser.
+	 *
+	 * @param c
+	 *            the c
+	 * @param tokens
+	 *            the tokens
+	 * @return the parser
+	 */
 	public Parser getParser(Carrier c, String[] tokens) {
 		switch (c) {
 		case NEPA:

@@ -1,71 +1,193 @@
 package plan;
 
 import java.net.MalformedURLException;
-import java.net.URL;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import components.Main.Carrier;
 
+// TODO: Auto-generated Javadoc
 /**
  * Page class for a PDF page. Holds necessary data to populate an excel sheet.
  */
-public class MedicalPlan implements Comparable, Plan {
+public class MedicalPlan implements Plan {
+	
+	/** The carrier. */
 	public Carrier carrier;
+	
+	/** The carrier id. */
 	public int carrier_id;
+	
+	/** The carrier plan id. */
 	public String carrier_plan_id;
+	
+	/** The start date. */
 	public String start_date;
+	
+	/** The end date. */
 	public String end_date;
+	
+	/** The product name. */
 	public String product_name;
+	
+	/** The plan pdf file name. */
 	public String plan_pdf_file_name;
+	
+	/** The deductible indiv. */
 	public String deductible_indiv;
+	
+	/** The deductible family. */
 	public String deductible_family;
+	
+	/** The oon deductible indiv. */
 	public String oon_deductible_indiv;
+	
+	/** The oon deductible family. */
 	public String oon_deductible_family;
+	
+	/** The coinsurance. */
 	public String coinsurance;
+	
+	/** The dr visit copay. */
 	public String dr_visit_copay;
+	
+	/** The specialist visit copay. */
 	public String specialist_visit_copay;
+	
+	/** The er copay. */
 	public String er_copay;
+	
+	/** The urgent care copay. */
 	public String urgent_care_copay;
+	
+	/** The rx copay. */
 	public String rx_copay;
+	
+	/** The rx mail copay. */
 	public String rx_mail_copay;
+	
+	/** The oop max indiv. */
 	public String oop_max_indiv;
+	
+	/** The oop max family. */
 	public String oop_max_family;
+	
+	/** The oon oop max indiv. */
 	public String oon_oop_max_indiv;
+	
+	/** The oon oop max family. */
 	public String oon_oop_max_family;
+	
+	/** The in patient hospital. */
 	public String in_patient_hospital;
+	
+	/** The outpatient diagnostic lab. */
 	public String outpatient_diagnostic_lab;
+	
+	/** The outpatient surgery. */
 	public String outpatient_surgery;
+	
+	/** The outpatient diagnostic x ray. */
 	public String outpatient_diagnostic_x_ray;
+	
+	/** The outpatient complex imaging. */
 	public String outpatient_complex_imaging;
+	
+	/** The physical occupational therapy. */
 	public String physical_occupational_therapy;
+	
+	/** The plan pdf url. */
 	public String plan_pdf_url;
+	
+	/** The group rating area. */
 	public String group_rating_area;
+	
+	/** The service zones. */
 	public String service_zones;
+	
+	/** The plan name. */
 	public String plan_name;
+	
+	/** The state. */
 	public String state;
+	
+	/** The non tobacco dict. */
 	public HashMap<String, Double> non_tobacco_dict;
+	
+	/** The non tobacco diff dict. */
 	public HashMap<String, Double> non_tobacco_diff_dict;
+	
+	/** The tobacco dict. */
 	public HashMap<String, Double> tobacco_dict;
+	
+	/** The tobacco diff dict. */
 	public HashMap<String, Double> tobacco_diff_dict;
+	
+	/** The non tobacco stats. */
 	public PlanStatistics non_tobacco_stats;
+	
+	/** The tobacco stats. */
 	public PlanStatistics tobacco_stats;
+	
+	/** The errors. */
 	public ArrayList<PlanError> errors;
+	
+	/** The warnings. */
 	public ArrayList<PlanWarning> warnings;
 
-	public MedicalPlan(Carrier carrier, int carrier_id, String carrier_plan_id, String start_date, String end_date, String product_name,
-			String plan_pdf_file_name, String deductible_indiv, String deductible_family, String oon_deductible_indiv,
-			String oon_deductible_family, String coinsurance, String dr_visit_copay, String specialist_visit_copay,
-			String er_copay, String urgent_care_copay, String rx_copay, String rx_mail_copay, String oop_max_indiv,
-			String oop_max_family, String oon_oop_max_indiv, String oon_oop_max_family, String in_patient_hospital,
-			String outpatient_diagnostic_lab, String outpatient_surgery, String outpatient_diagnostic_x_ray,
-			String outpatient_complex_imaging, String physical_occupupational_therapy, String pdf_url, String state, String group_rating_area,
-			String service_zones, HashMap<String, Double> non_tob_dict,
-			HashMap<String, Double> non_tob_diff_dict, HashMap<String, Double> tob_dict,
-			HashMap<String, Double> tob_diff_dict) {
+	/**
+	 * Instantiates a new medical plan.
+	 *
+	 * @param carrier the carrier
+	 * @param carrier_id the carrier id
+	 * @param carrier_plan_id the carrier plan id
+	 * @param start_date the start date
+	 * @param end_date the end date
+	 * @param product_name the product name
+	 * @param plan_pdf_file_name the plan pdf file name
+	 * @param deductible_indiv the deductible indiv
+	 * @param deductible_family the deductible family
+	 * @param oon_deductible_indiv the oon deductible indiv
+	 * @param oon_deductible_family the oon deductible family
+	 * @param coinsurance the coinsurance
+	 * @param dr_visit_copay the dr visit copay
+	 * @param specialist_visit_copay the specialist visit copay
+	 * @param er_copay the er copay
+	 * @param urgent_care_copay the urgent care copay
+	 * @param rx_copay the rx copay
+	 * @param rx_mail_copay the rx mail copay
+	 * @param oop_max_indiv the oop max indiv
+	 * @param oop_max_family the oop max family
+	 * @param oon_oop_max_indiv the oon oop max indiv
+	 * @param oon_oop_max_family the oon oop max family
+	 * @param in_patient_hospital the in patient hospital
+	 * @param outpatient_diagnostic_lab the outpatient diagnostic lab
+	 * @param outpatient_surgery the outpatient surgery
+	 * @param outpatient_diagnostic_x_ray the outpatient diagnostic x ray
+	 * @param outpatient_complex_imaging the outpatient complex imaging
+	 * @param physical_occupupational_therapy the physical occupupational therapy
+	 * @param pdf_url the pdf url
+	 * @param state the state
+	 * @param group_rating_area the group rating area
+	 * @param service_zones the service zones
+	 * @param non_tob_dict the non tob dict
+	 * @param non_tob_diff_dict the non tob diff dict
+	 * @param tob_dict the tob dict
+	 * @param tob_diff_dict the tob diff dict
+	 */
+	public MedicalPlan(Carrier carrier, int carrier_id, String carrier_plan_id, String start_date, String end_date,
+			String product_name, String plan_pdf_file_name, String deductible_indiv, String deductible_family,
+			String oon_deductible_indiv, String oon_deductible_family, String coinsurance, String dr_visit_copay,
+			String specialist_visit_copay, String er_copay, String urgent_care_copay, String rx_copay,
+			String rx_mail_copay, String oop_max_indiv, String oop_max_family, String oon_oop_max_indiv,
+			String oon_oop_max_family, String in_patient_hospital, String outpatient_diagnostic_lab,
+			String outpatient_surgery, String outpatient_diagnostic_x_ray, String outpatient_complex_imaging,
+			String physical_occupupational_therapy, String pdf_url, String state, String group_rating_area,
+			String service_zones, HashMap<String, Double> non_tob_dict, HashMap<String, Double> non_tob_diff_dict,
+			HashMap<String, Double> tob_dict, HashMap<String, Double> tob_diff_dict) {
 		this.carrier = carrier;
 		this.carrier_id = carrier_id;
 		this.carrier_plan_id = carrier_plan_id;
@@ -114,6 +236,11 @@ public class MedicalPlan implements Comparable, Plan {
 		this.warnings = new ArrayList<PlanWarning>();
 	}
 
+	/**
+	 * Instantiates a new medical plan.
+	 *
+	 * @throws MalformedURLException the malformed URL exception
+	 */
 	public MedicalPlan() throws MalformedURLException {
 		this.carrier_id = 0;
 		this.carrier_plan_id = "";
@@ -154,6 +281,9 @@ public class MedicalPlan implements Comparable, Plan {
 		this.warnings = new ArrayList<PlanWarning>();
 	}
 
+	/* (non-Javadoc)
+	 * @see plan.Plan#printPlan()
+	 */
 	/*
 	 * Print method used for debugging purposes.
 	 */
@@ -206,32 +336,33 @@ public class MedicalPlan implements Comparable, Plan {
 		}
 	}
 
-	@Override
-	public int compareTo(Object o) {
-		MedicalPlan otherObj = (MedicalPlan) o;
-		return (this.product_name.compareTo(otherObj.product_name));
-	}
-
+	/* (non-Javadoc)
+	 * @see plan.Plan#format()
+	 */
 	@Override
 	public void format() {
 		// TODO Auto-generated method stub
-
 	}
 
+	/* (non-Javadoc)
+	 * @see plan.Plan#hasTobaccoRates()
+	 */
 	public boolean hasTobaccoRates() {
 		return !tobacco_dict.isEmpty();
 	}
 
+	/* (non-Javadoc)
+	 * @see plan.Plan#computeStatistics()
+	 */
 	@Override
 	public void computeStatistics() {
 		List<Map.Entry<String, Double>> entryList;
 		if (!non_tobacco_dict.isEmpty()) {
 			entryList = new ArrayList<>(non_tobacco_dict.entrySet());
 			ArrayList<Double> values = new ArrayList<Double>();
-			for(Map.Entry<String, Double> entry: entryList){
+			for (Map.Entry<String, Double> entry : entryList) {
 				values.add(entry.getValue());
 			}
-			int index = 0;
 
 			Double min = Double.MAX_VALUE;
 			Double max = Double.MIN_VALUE;
@@ -258,10 +389,9 @@ public class MedicalPlan implements Comparable, Plan {
 		if (!tobacco_diff_dict.isEmpty()) {
 			entryList = new ArrayList<>(tobacco_dict.entrySet());
 			ArrayList<Double> values = new ArrayList<Double>();
-			for(Map.Entry<String, Double> entry: entryList){
+			for (Map.Entry<String, Double> entry : entryList) {
 				values.add(entry.getValue());
 			}
-			int index = 0;
 
 			Double min = Double.MAX_VALUE;
 			Double max = Double.MIN_VALUE;
@@ -286,40 +416,64 @@ public class MedicalPlan implements Comparable, Plan {
 			tobacco_stats = new PlanStatistics(min, max, median, mean, stdDev);
 		}
 	}
-	
-	public boolean hasErrors(){
+
+	/* (non-Javadoc)
+	 * @see plan.Plan#hasErrors()
+	 */
+	public boolean hasErrors() {
 		return !errors.isEmpty();
 	}
-	
-	public ArrayList<PlanError> getErrors(){
+
+	/* (non-Javadoc)
+	 * @see plan.Plan#getErrors()
+	 */
+	public ArrayList<PlanError> getErrors() {
 		return errors;
 	}
 
+	/* (non-Javadoc)
+	 * @see plan.Plan#addError(plan.PlanError)
+	 */
 	@Override
 	public void addError(PlanError e) {
 		errors.add(e);
 	}
 
+	/* (non-Javadoc)
+	 * @see plan.Plan#getWarnings()
+	 */
 	@Override
 	public ArrayList<PlanWarning> getWarnings() {
 		return warnings;
 	}
 
+	/* (non-Javadoc)
+	 * @see plan.Plan#hasWarnings()
+	 */
 	@Override
 	public boolean hasWarnings() {
 		return !warnings.isEmpty();
 	}
 
+	/* (non-Javadoc)
+	 * @see plan.Plan#addWarning(plan.PlanWarning)
+	 */
 	@Override
 	public void addWarning(PlanWarning w) {
 		warnings.add(w);
 	}
 
+	/* (non-Javadoc)
+	 * @see plan.Plan#hasPDFUrl()
+	 */
 	@Override
 	public boolean hasPDFUrl() {
-		return this.plan_pdf_url!=null;
+		return this.plan_pdf_url != null;
 	}
 
+	/* (non-Javadoc)
+	 * @see plan.Plan#getProductName()
+	 */
 	@Override
 	public String getProductName() {
 		return product_name;

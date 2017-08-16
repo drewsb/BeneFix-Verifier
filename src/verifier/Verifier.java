@@ -1,38 +1,83 @@
 package verifier;
 
 import java.io.IOException;
+
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import plan.Plan;
 import plan.PlanWarning;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Interface Verifier.
+ *
+ * @param <E> the element type
+ */
 public interface Verifier<E extends Plan> {
 
+	/**
+	 * Verify monotonicity.
+	 */
 	public void verifyMonotonicity();
 	
+	/**
+	 * Verify increments.
+	 */
 	public void verifyIncrements();
 
+	/**
+	 * Verify CV.
+	 */
 	public void verifyCV();
 
+	/**
+	 * Verify PDF mapping.
+	 *
+	 * @param plan the plan
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public void verifyPDFMapping(E plan) throws IOException;
 		
+	/**
+	 * Gets the plans.
+	 *
+	 * @return the plans
+	 */
 	public ArrayList<E> getPlans();
 	
+	/**
+	 * Generate plans.
+	 *
+	 * @throws MalformedURLException the malformed URL exception
+	 */
 	public void generatePlans() throws MalformedURLException;
 	
+	/**
+	 * Gets the warnings.
+	 *
+	 * @return the warnings
+	 */
 	public ArrayList<PlanWarning> getWarnings();
 	
+	/**
+	 * Gets the attribute index map.
+	 *
+	 * @return the attribute index map
+	 */
 	public HashMap<String, Integer> getAttributeIndexMap();
 	
+	/**
+	 * Gets the cell value.
+	 *
+	 * @param cell the cell
+	 * @return the cell value
+	 */
 	/*
 	 * Default method to retrieve the value of a cell from an Excel workbook.
 	 * Note: This måethod assumes that the parser is parsing an Excel file, NOT
@@ -52,6 +97,12 @@ public interface Verifier<E extends Plan> {
 		}
 	}
 
+	/**
+	 * Gets the num rows.
+	 *
+	 * @param sheet the sheet
+	 * @return the num rows
+	 */
 	/*
 	 * Default method to retrieve the number of rows which contain non-empty
 	 * cells Note: This method assumes that the parser is parsing an Excel file,

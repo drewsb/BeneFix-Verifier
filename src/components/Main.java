@@ -38,53 +38,174 @@ import javax.swing.UIManager;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import components.Main.State;
 import plan.DentalPlan;
 import plan.MedicalPlan;
 import plan.Plan;
 import plan.VisionPlan;
 import verifier.Verifier;
 
+// TODO: Auto-generated Javadoc
+/**
+* <h1>Benefix-Verifier</h1>
+* The Benefix Verifier program performs a series of checks and validations on a given set
+* of plans. The Main class controls the GUI of the application and serves as a bridge 
+* between the user and the verification program. The GUI gives the user the ability to upload multiple
+* sets of plans, pick the tests they want to be performed, and generate a report consisting of 
+* all warnings and errors found in the data.  
+* <p>
+*
+* @author  Drew Boyette
+* @version 1.0
+* @since   2017-08-16
+*/
 public class Main extends JPanel implements ActionListener {
+	
+	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
+	
+	/** The Constant newline. */
 	static private final String newline = "\n";
 
+	/** The clear button. */
 	JButton uploadButton, verifyButton, clearButton;
+	
+	/** The type box. */
 	JComboBox<String> typeBox;
+	
+	/** The carrier box. */
 	JComboBox<String> carrierBox;
+	
+	/** The state box. */
 	JComboBox<String> stateBox;
+	
+	/** The selected plans. */
 	ArrayList<File> selectedPlans;
+	
+	/** The progress bar. */
 	JProgressBar progressBar;
+	
+	/** The log. */
 	public JTextArea log;
+	
+	/** The fc. */
 	JFileChooser fc;
+	
+	/** The delegator. */
 	Delegator<?> delegator;
+	
+	/** The verifier. */
 	Verifier<Plan> verifier;
+	
+	/** The reports. */
 	ArrayList<Report<? extends Plan>> reports;
+	
+	/** The error summary box. */
 	JCheckBox monBox, cvBox, incBox, pdfBox, statisticsBox, errorSummaryBox;
+	
+	/** The input file. */
 	File inputFile;
+	
+	/** The filename. */
 	String filename;
+	
+	/** The done. */
 	Boolean done;
+	
+	/** The year. */
 	String year;
+	
+	/** The selected operation. */
 	String selectedOperation;
+	
+	/** The selected state. */
 	State selectedState;
+	
+	/** The carrier type. */
 	Carrier carrierType;
+	
+	/** The plan type. */
 	PlanType planType;
+	
+	/** The medical carriers. */
 	HashMap<String, Set<String>> medicalCarriers;
+	
+	/** The dental carriers. */
 	HashMap<String, Set<String>> dentalCarriers;
+	
+	/** The vision carriers. */
+	HashMap<String, Set<String>> visionCarriers;
+	
+	/** The source carriers. */
 	HashMap<String, Set<String>> sourceCarriers;
 
+	/**
+	 * The Enum Carrier.
+	 */
 	public enum Carrier {
-		Anthem, UPMC, Aetna, CPA, NEPA, WPA, IBC, CBC, AmeriHealth, UHC, Oxford, Cigna, Horizon, Geisinger, Delta, NONE
+		
+		/** The Anthem. */
+		Anthem, 
+ /** The upmc. */
+ UPMC, 
+ /** The Aetna. */
+ Aetna, 
+ /** The cpa. */
+ CPA, 
+ /** The nepa. */
+ NEPA, 
+ /** The wpa. */
+ WPA, 
+ /** The ibc. */
+ IBC, 
+ /** The cbc. */
+ CBC, 
+ /** The Ameri health. */
+ AmeriHealth, 
+ /** The uhc. */
+ UHC, 
+ /** The Oxford. */
+ Oxford, 
+ /** The Cigna. */
+ Cigna, 
+ /** The Horizon. */
+ Horizon, 
+ /** The Geisinger. */
+ Geisinger, 
+ /** The Delta. */
+ Delta, 
+ /** The none. */
+ NONE
 	}
 
+	/**
+	 * The Enum State.
+	 */
 	public enum State {
-		NJ, PA, CA, OH
+		
+		/** The nj. */
+		NJ, 
+ /** The pa. */
+ PA, 
+ /** The ca. */
+ CA, 
+ /** The oh. */
+ OH
 	}
 
+	/**
+	 * The Enum PlanType.
+	 */
 	public enum PlanType {
-		Medical, Dental, Vision
+		
+		/** The Medical. */
+		Medical, 
+ /** The Dental. */
+ Dental, 
+ /** The Vision. */
+ Vision
 	}
-	
+
+	/** The carrier abbrev map. */
 	public static HashMap<String, Carrier> carrierAbbrevMap = new HashMap<String, Carrier>() {
 		/**
 		 * 
@@ -102,6 +223,9 @@ public class Main extends JPanel implements ActionListener {
 		}
 	};
 
+	/**
+	 * Instantiates a new main.
+	 */
 	public Main() {
 		super(new BorderLayout());
 		selectedPlans = new ArrayList<File>();
@@ -143,7 +267,7 @@ public class Main extends JPanel implements ActionListener {
 
 		clearButton = new JButton("Clear plans");
 		clearButton.addActionListener(this);
-		
+
 		errorSummaryBox = new JCheckBox("Generate Error Summary");
 		statisticsBox = new JCheckBox("Generate Statistics Summary");
 
@@ -182,14 +306,11 @@ public class Main extends JPanel implements ActionListener {
 		Set<String> OH_dental_carriers = new HashSet<String>(Arrays.asList(OH_dental));
 		dentalCarriers.put("OH", OH_dental_carriers);
 
-		String[] sheets = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16",
-				"17", "18", "19", "20" };
-
-		String[] quarters = { "Q1", "Q2", "Q3", "Q4" };
+		// String[] sheets = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+		// "10", "11", "12", "13", "14", "15", "16",
+		// "17", "18", "19", "20" };
 
 		Set<String> states = medicalCarriers.keySet();
-
-		String[] selection = { "Compare", "Merge" };
 
 		String[] types = { "Medical", "Dental", "Vision" };
 
@@ -203,17 +324,16 @@ public class Main extends JPanel implements ActionListener {
 
 		JPanel progressPanel = new JPanel();
 		progressPanel.add(progressBar);
-		
+
 		JPanel sheetPanel = new JPanel();
 		sheetPanel.add(errorSummaryBox);
 		sheetPanel.add(statisticsBox);
-		
+
 		JPanel boxPanel = new JPanel();
 		boxPanel.add(monBox);
 		boxPanel.add(cvBox);
 		boxPanel.add(incBox);
 		boxPanel.add(pdfBox);
-
 
 		JPanel typePanel = new JPanel();
 		typePanel.add(typeLbl);
@@ -251,11 +371,14 @@ public class Main extends JPanel implements ActionListener {
 		cvBox.setSelected(true);
 		incBox.setSelected(true);
 		pdfBox.setSelected(false);
-		
+
 		errorSummaryBox.setSelected(true);
 		statisticsBox.setSelected(true);
 	}
 
+	/* (non-Javadoc)
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
 	public void actionPerformed(ActionEvent e) {
 		// Handle open plan button action.
 		if (e.getSource() == uploadButton) {
@@ -285,20 +408,20 @@ public class Main extends JPanel implements ActionListener {
 			checkPlan();
 			checkState();
 
-			switch(planType){
+			switch (planType) {
 			case Medical:
-				delegator = new Delegator<MedicalPlan>(carrierType, planType, selectedPlans, monBox.isSelected(), cvBox.isSelected(),
-						incBox.isSelected(), pdfBox.isSelected(), log, progressBar);
+				delegator = new Delegator<MedicalPlan>(carrierType, planType, selectedPlans, monBox.isSelected(),
+						cvBox.isSelected(), incBox.isSelected(), pdfBox.isSelected(), log, progressBar);
 				break;
 			case Dental:
-				delegator = new Delegator<DentalPlan>(carrierType, planType, selectedPlans, monBox.isSelected(), cvBox.isSelected(),
-						incBox.isSelected(), pdfBox.isSelected(), log, progressBar);
+				delegator = new Delegator<DentalPlan>(carrierType, planType, selectedPlans, monBox.isSelected(),
+						cvBox.isSelected(), incBox.isSelected(), pdfBox.isSelected(), log, progressBar);
 				break;
 			case Vision:
-				delegator = new Delegator<VisionPlan>(carrierType, planType, selectedPlans, monBox.isSelected(), cvBox.isSelected(),
-						incBox.isSelected(), pdfBox.isSelected(), log, progressBar);
+				delegator = new Delegator<VisionPlan>(carrierType, planType, selectedPlans, monBox.isSelected(),
+						cvBox.isSelected(), incBox.isSelected(), pdfBox.isSelected(), log, progressBar);
 				break;
-			
+
 			}
 			delegator.addPropertyChangeListener(new PropertyChangeListener() {
 				@Override
@@ -316,16 +439,12 @@ public class Main extends JPanel implements ActionListener {
 								reports = (delegator).get();
 								createExcel();
 							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							} catch (ExecutionException e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							} catch (FileNotFoundException e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							} catch (IOException e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 							break;
@@ -361,6 +480,11 @@ public class Main extends JPanel implements ActionListener {
 			case Dental:
 				this.sourceCarriers = dentalCarriers;
 				break;
+			case Vision:
+				this.sourceCarriers = visionCarriers;
+				break;
+			default:
+				break;
 			}
 			carrierBox.removeAllItems();
 			Set<String> c = sourceCarriers.get(selectedState.toString());
@@ -372,6 +496,12 @@ public class Main extends JPanel implements ActionListener {
 		}
 	}
 
+	/**
+	 * Creates the excel.
+	 *
+	 * @throws FileNotFoundException the file not found exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public void createExcel() throws FileNotFoundException, IOException {
 		ExcelWriter<? extends Plan> writer = null;
 		if (reports.size() == 0) {
@@ -380,15 +510,15 @@ public class Main extends JPanel implements ActionListener {
 		}
 		int totalErrors = 0;
 		int totalWarnings = 0;
-		for(Report<? extends Plan> r : reports){
+		for (Report<? extends Plan> r : reports) {
 			totalErrors += r.getTotalErrorSize();
 			totalWarnings += r.getTotalWarningSize();
 		}
-		if(totalErrors + totalWarnings == 0){
+		if (totalErrors + totalWarnings == 0) {
 			log.append("No output file produced.\n");
 			return;
 		}
-		switch(planType){
+		switch (planType) {
 		case Medical:
 			writer = new MedicalExcelWriter(log, reports);
 			break;
@@ -400,15 +530,15 @@ public class Main extends JPanel implements ActionListener {
 			break;
 		}
 		writer.populateLog();
-		if(errorSummaryBox.isSelected()){
+		if (errorSummaryBox.isSelected()) {
 			writer.populateErrorSummary();
 		}
-		if(statisticsBox.isSelected()){
+		if (statisticsBox.isSelected()) {
 			writer.populateStatisticsSummary();
 		}
-		
+
 		HashMap<String, XSSFWorkbook> reportMap = writer.getWorkbooks();
-		for(Map.Entry<String, XSSFWorkbook> entry : reportMap.entrySet()){
+		for (Map.Entry<String, XSSFWorkbook> entry : reportMap.entrySet()) {
 			String outputName = String.format("%s_report.xlsx", entry.getKey());
 			log.append(String.format("Output file: %s", outputName));
 			XSSFWorkbook workbook = entry.getValue();
@@ -419,7 +549,10 @@ public class Main extends JPanel implements ActionListener {
 			workbook.close();
 		}
 	}
-	
+
+	/**
+	 * Check state.
+	 */
 	public void checkState() {
 		if (stateBox.getSelectedItem().equals("PA")) {
 			this.selectedState = State.PA;
@@ -435,6 +568,9 @@ public class Main extends JPanel implements ActionListener {
 		}
 	}
 
+	/**
+	 * Check carrier.
+	 */
 	public void checkCarrier() {
 		if (carrierBox.getSelectedItem().equals("UPMC")) {
 			this.carrierType = Carrier.UPMC;
@@ -469,6 +605,9 @@ public class Main extends JPanel implements ActionListener {
 		}
 	}
 
+	/**
+	 * Check plan.
+	 */
 	public void checkPlan() {
 		if (typeBox.getSelectedItem().equals("Medical")) {
 			this.planType = PlanType.Medical;
@@ -479,7 +618,12 @@ public class Main extends JPanel implements ActionListener {
 		}
 	}
 
-	/** Returns an ImageIcon, or null if the path was invalid. */
+	/**
+	 *  Returns an ImageIcon, or null if the path was invalid.
+	 *
+	 * @param path the path
+	 * @return the image icon
+	 */
 	protected static ImageIcon createImageIcon(String path) {
 		java.net.URL imgURL = Main.class.getResource(path);
 		if (imgURL != null) {
@@ -507,6 +651,11 @@ public class Main extends JPanel implements ActionListener {
 		frame.setVisible(true);
 	}
 
+	/**
+	 * The main method.
+	 *
+	 * @param args the arguments
+	 */
 	public static void main(String[] args) {
 		// Schedule a job for the event dispatch thread:
 		// creating and showing this application's GUI.

@@ -1,66 +1,97 @@
 package verifier;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import plan.DentalPlan;
-import plan.Plan;
+import plan.PlanWarning;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class DentalVerifier.
+ */
 public class DentalVerifier implements Verifier<DentalPlan> {
 	
+	/** The workbook. */
 	final XSSFWorkbook workbook;
 
+	/**
+	 * Instantiates a new dental verifier.
+	 *
+	 * @param workbook the workbook
+	 */
 	public DentalVerifier(XSSFWorkbook workbook) {
 		super();
 		this.workbook = workbook;
 	}
 
+	/* (non-Javadoc)
+	 * @see verifier.Verifier#verifyMonotonicity()
+	 */
 	@Override
 	public void verifyMonotonicity() {
 		// TODO Auto-generated method stub
 		
 	}
 
+	/* (non-Javadoc)
+	 * @see verifier.Verifier#verifyCV()
+	 */
 	@Override
 	public void verifyCV() {
 		// TODO Auto-generated method stub
 		
 	}
 
+	/* (non-Javadoc)
+	 * @see verifier.Verifier#verifyPDFMapping(plan.Plan)
+	 */
 	@Override
 	public void verifyPDFMapping(DentalPlan plan) {
 		// TODO Auto-generated method stub
 		
 	}
 
+	/* (non-Javadoc)
+	 * @see verifier.Verifier#getPlans()
+	 */
 	@Override
 	public ArrayList<DentalPlan> getPlans() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see verifier.Verifier#generatePlans()
+	 */
 	@Override
 	public void generatePlans() {
 		// TODO Auto-generated method stub
 	}
 
+	/* (non-Javadoc)
+	 * @see verifier.Verifier#getWarnings()
+	 */
 	@Override
-	public ArrayList getWarnings() {
+	public ArrayList<PlanWarning> getWarnings() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see verifier.Verifier#getAttributeIndexMap()
+	 */
 	@Override
 	public HashMap<String, Integer> getAttributeIndexMap() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see verifier.Verifier#verifyIncrements()
+	 */
 	@Override
 	public void verifyIncrements() {
 		// TODO Auto-generated method stub

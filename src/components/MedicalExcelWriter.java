@@ -3,7 +3,6 @@ package components;
 import java.io.FileNotFoundException;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,26 +18,42 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import components.Attribute.AttributeType;
-import components.Main.Carrier;
 import plan.*;
 import plan.PlanError.*;
 import plan.PlanWarning.*;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class MedicalExcelWriter.
+ */
 /*
- * Uses Apache Poi package found at https://www.apache.org. 
+ * Uses Apache Poi package found at https://www.apache.org.
  */
 public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 
+	/** The log. */
 	final JTextArea log;
 
+	/** The reports. */
 	final ArrayList<Report<MedicalPlan>> reports;
 
+	/** The workbook map. */
 	final HashMap<Report<MedicalPlan>, XSSFWorkbook> workbookMap;
 
+	/** The xred. */
 	static XSSFColor xred = new XSSFColor(new java.awt.Color(240, 128, 128));
 
+	/** The xyellow. */
 	static XSSFColor xyellow = new XSSFColor(new java.awt.Color(244, 241, 66));
 
+	/**
+	 * Instantiates a new medical excel writer.
+	 *
+	 * @param log
+	 *            the log
+	 * @param reports
+	 *            the reports
+	 */
 	@SuppressWarnings("unchecked")
 	public MedicalExcelWriter(JTextArea log, ArrayList<Report<? extends Plan>> reports) {
 		super();
@@ -50,10 +65,27 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 		this.workbookMap = new HashMap<Report<MedicalPlan>, XSSFWorkbook>();
 	}
 
+	/**
+	 * Generate error styles.
+	 */
 	public void generateErrorStyles() {
 
 	}
 
+	/**
+	 * Populate row.
+	 *
+	 * @param workbook
+	 *            the workbook
+	 * @param attributeIndexMap
+	 *            the attribute index map
+	 * @param sheet
+	 *            the sheet
+	 * @param row
+	 *            the row
+	 * @param p
+	 *            the p
+	 */
 	public static void populateRow(XSSFWorkbook workbook, HashMap<String, Integer> attributeIndexMap, Sheet sheet,
 			Row row, MedicalPlan p) {
 		int colCount = 0;
@@ -215,9 +247,13 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 			cell.setCellValue(p.plan_pdf_url.toString());
 			cell = row.createCell(colCount++);
 		}
-		cell.setCellValue(p.non_tobacco_dict.get("0-18"));
+		if (p.non_tobacco_dict.containsKey("0-18")) {
+			cell.setCellValue(p.non_tobacco_dict.get("0-18"));
+		}
 		cell = row.createCell(colCount++);
-		cell.setCellValue(p.non_tobacco_dict.get("19-20"));
+		if (p.non_tobacco_dict.containsKey("19-20")) {
+			cell.setCellValue(p.non_tobacco_dict.get("19-20"));
+		}
 		for (int i = 0; i < 44; i++) {
 			cell = row.createCell(colCount++);
 			String index = String.format("%d", i + 21);
@@ -225,13 +261,16 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 		}
 
 		cell = row.createCell(colCount++);
-		String max_age_string = String.format("%d+", 65);
-		cell.setCellValue(p.non_tobacco_dict.get(max_age_string));
+		if (p.non_tobacco_dict.containsKey("65+")) {
+			cell.setCellValue(p.non_tobacco_dict.get("65+"));
+		}
 
 		if (p.hasTobaccoRates()) {
 			colCount++;
 			cell = row.createCell(colCount++);
-			cell.setCellValue(p.non_tobacco_dict.get("0-18"));
+			if (p.tobacco_dict.containsKey("0-18")) {
+				cell.setCellValue(p.tobacco_dict.get("0-18"));
+			}
 			cell = row.createCell(colCount++);
 			cell.setCellValue(p.non_tobacco_dict.get("19-20"));
 			for (int i = 0; i < 44; i++) {
@@ -241,21 +280,33 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 			}
 
 			cell = row.createCell(colCount++);
-			cell.setCellValue(p.non_tobacco_dict.get(max_age_string));
+			if (p.tobacco_dict.containsKey("65+")) {
+				cell.setCellValue(p.tobacco_dict.get("65+"));
+			}
 		}
 
 		XSSFCellStyle error_highlighter = workbook.createCellStyle();
 		XSSFCellStyle warning_highlighter = workbook.createCellStyle();
-		
+
 		warning_highlighter.setFillForegroundColor(xyellow);
 		warning_highlighter.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 		error_highlighter.setFillForegroundColor(xred);
 		error_highlighter.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-		
+
 		fillWarnings(p.getWarnings(), row, warning_highlighter);
 		fillErrors(p.getErrors(), row, error_highlighter);
 	}
 
+	/**
+	 * Fill errors.
+	 *
+	 * @param errors
+	 *            the errors
+	 * @param row
+	 *            the row
+	 * @param highlighter
+	 *            the highlighter
+	 */
 	public static void fillErrors(ArrayList<PlanError> errors, Row row, XSSFCellStyle highlighter) {
 		for (PlanError error : errors) {
 			int location = 0;
@@ -275,14 +326,14 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 
 				cell = row.getCell(location);
 				cell.setCellStyle(highlighter);
-				
-				if(secondAtt != null){
+
+				if (secondAtt != null) {
 					location = Attribute.attributes.indexOf(secondAtt);
 					cell = row.getCell(location);
 					cell.setCellStyle(highlighter);
 				}
-				
-				if(rateType == RateType.BOTH){
+
+				if (rateType == RateType.BOTH) {
 					location += 48;
 					cell = row.getCell(location);
 					cell.setCellStyle(highlighter);
@@ -291,6 +342,16 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 		}
 	}
 
+	/**
+	 * Fill warnings.
+	 *
+	 * @param warnings
+	 *            the warnings
+	 * @param row
+	 *            the row
+	 * @param highlighter
+	 *            the highlighter
+	 */
 	public static void fillWarnings(ArrayList<PlanWarning> warnings, Row row, XSSFCellStyle highlighter) {
 		for (PlanWarning warning : warnings) {
 			int location = 0;
@@ -313,12 +374,17 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 	 * "BenefixData.xlsx".
 	 */
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see components.ExcelWriter#populateLog()
+	 */
 	@Override
 	public void populateLog() throws FileNotFoundException, IOException {
 		Sheet sheet;
 		for (Report<MedicalPlan> r : reports) {
 			XSSFWorkbook workbook = new XSSFWorkbook();
-			if (r.getTotalErrorSize()==0 & r.getTotalWarningSize() == 0) {
+			if (r.getTotalErrorSize() == 0 & r.getTotalWarningSize() == 0) {
 				log.append(String.format("All tests passed for %s.\nNo output file produced.\n", r.getFilename()));
 				continue;
 			}
@@ -380,6 +446,11 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 		log.append("Finished populating error log.\n");
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see components.ExcelWriter#populateErrorSummary()
+	 */
 	@Override
 	public void populateErrorSummary() throws IOException {
 		for (Map.Entry<Report<MedicalPlan>, XSSFWorkbook> entry : workbookMap.entrySet()) {
@@ -405,8 +476,8 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 				cell = row.createCell(col_index++);
 				cell.setCellValue(Attribute.attributes.get(i).toString().toLowerCase());
 			}
-			
-			if(entry.getKey().hasTobbacoRates){
+
+			if (entry.getKey().hasTobbacoRates) {
 				col_index++;
 				for (int i = 32; i < Attribute.attributes.size() - 1; i++) {
 					cell = row.createCell(col_index++);
@@ -430,6 +501,11 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 		log.append("Finished populating error summary.\n");
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see components.ExcelWriter#populateStatisticsSummary()
+	 */
 	@Override
 	public void populateStatisticsSummary() throws IOException {
 		for (Map.Entry<Report<MedicalPlan>, XSSFWorkbook> entry : workbookMap.entrySet()) {
@@ -464,7 +540,7 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 				row_index = 0;
 				row = sheet.getRow(row_index);
 				cell = row.createCell(col_index);
-				cell.setCellValue("Non-Tobacco Rates");
+				cell.setCellValue("Tobacco Rates");
 
 				row_index = 1;
 				row = sheet.getRow(row_index);
@@ -503,6 +579,28 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 				cell.setCellValue(String.format("%.2f", 100 * plan.non_tobacco_stats.getCV()) + "%");
 			}
 
+			if (entry.getKey().hasTobbacoRates) {
+				row_index = 1;
+				for (MedicalPlan plan : entry.getKey().getPlans()) {
+					col_index = 7;
+					row = sheet.getRow(++row_index);
+					cell = row.createCell(col_index++);
+					cell.setCellValue(plan.product_name);
+					cell = row.createCell(col_index++);
+					cell.setCellValue(plan.tobacco_stats.getMin());
+					cell = row.createCell(col_index++);
+					cell.setCellValue(plan.tobacco_stats.getMax());
+					cell = row.createCell(col_index++);
+					cell.setCellValue(plan.tobacco_stats.getMedian());
+					cell = row.createCell(col_index++);
+					cell.setCellValue(String.format("%.2f", plan.tobacco_stats.getMean()));
+					cell = row.createCell(col_index++);
+					cell.setCellValue(String.format("%.2f", plan.tobacco_stats.getStdDev()));
+					cell = row.createCell(col_index++);
+					cell.setCellValue(String.format("%.2f", 100 * plan.tobacco_stats.getCV()) + "%");
+				}
+			}
+
 			for (int x = 0; x < row.getPhysicalNumberOfCells(); x++) {
 				sheet.autoSizeColumn(x);
 			}
@@ -511,6 +609,11 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 		log.append("Finished populating statistics summary.\n");
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see components.ExcelWriter#getWorkbooks()
+	 */
 	@Override
 	public HashMap<String, XSSFWorkbook> getWorkbooks() {
 		HashMap<String, XSSFWorkbook> filenameWorkbookMap = new HashMap<String, XSSFWorkbook>();

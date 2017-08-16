@@ -2,16 +2,9 @@ package components;
 
 import java.io.File;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.swing.JProgressBar;
 import javax.swing.JTextArea;
@@ -20,17 +13,9 @@ import javax.swing.SwingWorker;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import components.Main.Carrier;
-import components.Main.State;
 import plan.Plan;
 import plan.PlanWarning;
 import verifier.DentalVerifier;
@@ -39,41 +24,75 @@ import verifier.Verifier;
 import verifier.VisionVerifier;
 import components.Main.PlanType;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class Delegator.
+ *
+ * @param <E> the element type
+ */
 public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? extends Plan>>, String> {
 
+	/** The carrier type. */
 	final Carrier carrierType;
 
+	/** The plan type. */
 	final PlanType planType;
 
+	/** The selected plans. */
 	final ArrayList<File> selectedPlans;
 
+	/** The text area. */
 	final JTextArea textArea;
 
+	/** The bar. */
 	final JProgressBar bar;
 
+	/** The mon check. */
 	final Boolean monCheck;
 
+	/** The cv check. */
 	final Boolean cvCheck;
-	
+
+	/** The inc check. */
 	final Boolean incCheck;
 
+	/** The pdf check. */
 	final Boolean pdfCheck;
 
+	/** The index. */
 	int index;
 
+	/** The size. */
 	int size;
 
+	/** The start date. */
 	String start_date;
 
+	/** The end date. */
 	String end_date;
 
+	/** The reports. */
 	ArrayList<Report<? extends Plan>> reports;
 
+	/** The plans. */
 	ArrayList<E> plans;
 
+	/**
+	 * Instantiates a new delegator.
+	 *
+	 * @param carrierType the carrier type
+	 * @param planType the plan type
+	 * @param selectedPlans the selected plans
+	 * @param monCheck the mon check
+	 * @param cvCheck the cv check
+	 * @param incCheck the inc check
+	 * @param pdfCheck the pdf check
+	 * @param textArea the text area
+	 * @param bar the bar
+	 */
 	public Delegator(final Carrier carrierType, PlanType planType, final ArrayList<File> selectedPlans,
-			final Boolean monCheck, final Boolean cvCheck, final Boolean incCheck, final Boolean pdfCheck, final JTextArea textArea,
-			final JProgressBar bar) {
+			final Boolean monCheck, final Boolean cvCheck, final Boolean incCheck, final Boolean pdfCheck,
+			final JTextArea textArea, final JProgressBar bar) {
 		this.carrierType = carrierType;
 		this.planType = planType;
 		this.selectedPlans = selectedPlans;
@@ -85,6 +104,9 @@ public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? ex
 		this.bar = bar;
 	}
 
+	/* (non-Javadoc)
+	 * @see javax.swing.SwingWorker#doInBackground()
+	 */
 	@Override
 	protected ArrayList<Report<? extends Plan>> doInBackground() throws Exception {
 		int multiplier = (monCheck) ? 1 : 0; // If checking for monotonocity,
@@ -101,14 +123,29 @@ public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? ex
 		return reports;
 	}
 
+	/**
+	 * Removes the file extension.
+	 *
+	 * @param input the input
+	 * @return the string
+	 */
 	public static String removeFileExtension(String input) {
 		return input.substring(0, input.lastIndexOf("."));
 	}
 
+	/**
+	 * Gets the value.
+	 *
+	 * @return the value
+	 * @throws Exception the exception
+	 */
 	public ArrayList<Report<? extends Plan>> getValue() throws Exception {
 		return this.get();
 	}
 
+	/* (non-Javadoc)
+	 * @see javax.swing.SwingWorker#process(java.util.List)
+	 */
 	@Override
 	protected void process(final List<String> chunks) {
 		// Updates the messages text area
@@ -118,7 +155,13 @@ public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? ex
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * Verify plans.
+	 *
+	 * @throws EncryptedDocumentException the encrypted document exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws OpenXML4JException the open XML 4 J exception
+	 */
 	public void verifyPlans() throws EncryptedDocumentException, IOException, OpenXML4JException {
 		reports = new ArrayList<Report<? extends Plan>>();
 		String output;
@@ -135,7 +178,7 @@ public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? ex
 			planVerifier.generatePlans();
 			plans = (ArrayList<E>) planVerifier.getPlans();
 			Double numPlans = (double) plans.size();
-			
+
 			output = String.format("Statistics computed.");
 			System.out.println(output);
 			publish(output + "\n");
@@ -158,8 +201,8 @@ public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? ex
 				publish(output + "\n");
 				index++;
 				setProgress(100 * (index) / size);
-			} 
-			
+			}
+
 			if (incCheck) {
 				planVerifier.verifyIncrements();
 				output = "Increment checks complete.";
@@ -167,7 +210,7 @@ public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? ex
 				publish(output + "\n");
 				index++;
 				setProgress(100 * (index) / size);
-			} 
+			}
 
 			if (pdfCheck) {
 				output = "\nBeginning PDF verification tests.\n";
@@ -178,7 +221,7 @@ public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? ex
 						planVerifier.verifyPDFMapping(plan);
 						Double progress = 100 * (index + (++plan_index / numPlans)) / size;
 						setProgress(progress.intValue());
-						
+
 						output = String.format("PDF check complete for plan %s.", plan.getProductName());
 						System.out.println(output);
 						publish(output + "\n");
@@ -211,15 +254,26 @@ public class Delegator<E extends Plan> extends SwingWorker<ArrayList<Report<? ex
 		index++;
 	}
 
-	public Verifier getVerifier(PlanType type, XSSFWorkbook workbook)
+	/**
+	 * Gets the verifier.
+	 *
+	 * @param type the type
+	 * @param workbook the workbook
+	 * @return the verifier
+	 * @throws EncryptedDocumentException the encrypted document exception
+	 * @throws InvalidFormatException the invalid format exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
+	@SuppressWarnings("unchecked")
+	public Verifier<E> getVerifier(PlanType type, XSSFWorkbook workbook)
 			throws EncryptedDocumentException, InvalidFormatException, IOException {
 		switch (type) {
 		case Medical:
-			return new MedicalVerifier(workbook, carrierType);
+			return (Verifier<E>) new MedicalVerifier(workbook, carrierType);
 		case Dental:
-			return new DentalVerifier(workbook);
+			return (Verifier<E>) new DentalVerifier(workbook);
 		case Vision:
-			return new VisionVerifier(workbook);
+			return (Verifier<E>) new VisionVerifier(workbook);
 		}
 
 		return null;

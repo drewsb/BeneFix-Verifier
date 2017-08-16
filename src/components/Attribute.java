@@ -7,8 +7,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class Attribute.
+ */
 public class Attribute {
 
+	/** The age band map. */
 	public static HashMap<String, String> ageBandMap = new HashMap<String, String>() {
 		/**
 		 * 
@@ -66,34 +71,201 @@ public class Attribute {
 
 		}
 	};
-	
+
+	/** The age reverse band map. */
 	public static HashMap<String, String> ageReverseBandMap = (HashMap<String, String>) invert(ageBandMap);
-	
+
+	/**
+	 * Invert.
+	 *
+	 * @param <V> the value type
+	 * @param <K> the key type
+	 * @param map the map
+	 * @return the map
+	 */
 	public static <V, K> Map<V, K> invert(HashMap<K, V> map) {
-	    return map.entrySet()
-	              .stream()
-	              .collect(Collectors.toMap(Entry::getValue, c -> c.getKey()));
+		return map.entrySet().stream().collect(Collectors.toMap(Entry::getValue, c -> c.getKey()));
 	}
 
+	/**
+	 * The Enum AttributeType.
+	 */
 	public enum AttributeType {
-		CARRIER, CARRIER_ID, CARRIER_PLAN_ID, START_DATE, END_DATE, PRODUCT_NAME, PLAN_PDF_FILE_NAME, STATE, GROUP_RATING_AREAS, SERVICE_ZONES, DEDUCTIBLE_INDIV, 
-		DEDUCTIBLE_FAMILY, OON_DEDUCTIBLE_INDIVIDUAL, OON_DEDUCTIBLE_FAMILY, COINSURANCE, DR_VISIT_COPAY, SPECIALIST_VISITS_COPAY, 
-		ER_COPAY, URGENT_CARE_COPAY, RX_COPAY, RX_MAIL_COPAY, OOP_MAX_INDIV, OOP_MAX_FAMILY, OON_OOP_MAX_INDIVIDUAL, OON_OOP_MAX_FAMILY, 
-		IN_PATIENT_HOSPITAL, OUTPATIENT_DIAGNOSTIC_LAB, OUTPATIENT_SURGERY, OUTPATIENT_DIAGNOSTIC_X_RAY, OUTPATIENT_COMPLEX_IMAGING, 
-		PHYSICAL_OCCUPATIONAL_THERAPY, PLAN_PDF_FILE_URL, ZERO_EIGHTEEN, NINETEEN_TWENTY, TWENTY_ONE, TWENTY_TWO, 
-		TWENTY_THREE, TWENTY_FOUR, TWENTY_FIVE, TWENTY_SIX, TWENTY_SEVEN, TWENTY_EIGHT, TWENTY_NINE, THIRTY, THIRTY_ONE, THIRTY_TWO, 
-		THIRTY_THREE, THIRTY_FOUR, THIRTY_FIVE, THIRTY_SIX, THIRTY_SEVEN, THIRTY_EIGHT, THIRTY_NINE, FORTY, FORTY_ONE, FORTY_TWO, 
-		FORTY_THREE, FORTY_FOUR, FORTY_FIVE, FORTY_SIX, FORTY_SEVEN, FORTY_EIGHT, FORTY_NINE, FIFTY, FIFTY_ONE, FIFTY_TWO, FIFTY_THREE,
-		FIFTY_FOUR, FIFTY_FIVE, FIFTY_SIX, FIFTY_SEVEN, FIFTY_EIGHT, FIFTY_NINE, SIXTY, SIXTY_ONE, SIXTY_TWO, SIXTY_THREE, SIXTY_FOUR, SIXTY_FIVE_PLUS, NONE
+		
+		/** The carrier. */
+		CARRIER, 
+ /** The carrier id. */
+ CARRIER_ID, 
+ /** The carrier plan id. */
+ CARRIER_PLAN_ID, 
+ /** The start date. */
+ START_DATE, 
+ /** The end date. */
+ END_DATE, 
+ /** The product name. */
+ PRODUCT_NAME, 
+ /** The plan pdf file name. */
+ PLAN_PDF_FILE_NAME, 
+ /** The state. */
+ STATE, 
+ /** The group rating areas. */
+ GROUP_RATING_AREAS, 
+ /** The service zones. */
+ SERVICE_ZONES, 
+ /** The deductible indiv. */
+ DEDUCTIBLE_INDIV, 
+ /** The deductible family. */
+ DEDUCTIBLE_FAMILY, 
+ /** The oon deductible individual. */
+ OON_DEDUCTIBLE_INDIVIDUAL, 
+ /** The oon deductible family. */
+ OON_DEDUCTIBLE_FAMILY, 
+ /** The coinsurance. */
+ COINSURANCE, 
+ /** The dr visit copay. */
+ DR_VISIT_COPAY, 
+ /** The specialist visits copay. */
+ SPECIALIST_VISITS_COPAY, 
+ /** The er copay. */
+ ER_COPAY, 
+ /** The urgent care copay. */
+ URGENT_CARE_COPAY, 
+ /** The rx copay. */
+ RX_COPAY, 
+ /** The rx mail copay. */
+ RX_MAIL_COPAY, 
+ /** The oop max indiv. */
+ OOP_MAX_INDIV, 
+ /** The oop max family. */
+ OOP_MAX_FAMILY, 
+ /** The oon oop max individual. */
+ OON_OOP_MAX_INDIVIDUAL, 
+ /** The oon oop max family. */
+ OON_OOP_MAX_FAMILY, 
+ /** The in patient hospital. */
+ IN_PATIENT_HOSPITAL, 
+ /** The outpatient diagnostic lab. */
+ OUTPATIENT_DIAGNOSTIC_LAB, 
+ /** The outpatient surgery. */
+ OUTPATIENT_SURGERY, 
+ /** The outpatient diagnostic x ray. */
+ OUTPATIENT_DIAGNOSTIC_X_RAY, 
+ /** The outpatient complex imaging. */
+ OUTPATIENT_COMPLEX_IMAGING, 
+ /** The physical occupational therapy. */
+ PHYSICAL_OCCUPATIONAL_THERAPY, 
+ /** The plan pdf file url. */
+ PLAN_PDF_FILE_URL, 
+ /** The zero eighteen. */
+ ZERO_EIGHTEEN, 
+ /** The nineteen twenty. */
+ NINETEEN_TWENTY, 
+ /** The twenty one. */
+ TWENTY_ONE, 
+ /** The twenty two. */
+ TWENTY_TWO, 
+ /** The twenty three. */
+ TWENTY_THREE, 
+ /** The twenty four. */
+ TWENTY_FOUR, 
+ /** The twenty five. */
+ TWENTY_FIVE, 
+ /** The twenty six. */
+ TWENTY_SIX, 
+ /** The twenty seven. */
+ TWENTY_SEVEN, 
+ /** The twenty eight. */
+ TWENTY_EIGHT, 
+ /** The twenty nine. */
+ TWENTY_NINE, 
+ /** The thirty. */
+ THIRTY, 
+ /** The thirty one. */
+ THIRTY_ONE, 
+ /** The thirty two. */
+ THIRTY_TWO, 
+ /** The thirty three. */
+ THIRTY_THREE, 
+ /** The thirty four. */
+ THIRTY_FOUR, 
+ /** The thirty five. */
+ THIRTY_FIVE, 
+ /** The thirty six. */
+ THIRTY_SIX, 
+ /** The thirty seven. */
+ THIRTY_SEVEN, 
+ /** The thirty eight. */
+ THIRTY_EIGHT, 
+ /** The thirty nine. */
+ THIRTY_NINE, 
+ /** The forty. */
+ FORTY, 
+ /** The forty one. */
+ FORTY_ONE, 
+ /** The forty two. */
+ FORTY_TWO, 
+ /** The forty three. */
+ FORTY_THREE, 
+ /** The forty four. */
+ FORTY_FOUR, 
+ /** The forty five. */
+ FORTY_FIVE, 
+ /** The forty six. */
+ FORTY_SIX, 
+ /** The forty seven. */
+ FORTY_SEVEN, 
+ /** The forty eight. */
+ FORTY_EIGHT, 
+ /** The forty nine. */
+ FORTY_NINE, 
+ /** The fifty. */
+ FIFTY, 
+ /** The fifty one. */
+ FIFTY_ONE, 
+ /** The fifty two. */
+ FIFTY_TWO, 
+ /** The fifty three. */
+ FIFTY_THREE, 
+ /** The fifty four. */
+ FIFTY_FOUR, 
+ /** The fifty five. */
+ FIFTY_FIVE, 
+ /** The fifty six. */
+ FIFTY_SIX, 
+ /** The fifty seven. */
+ FIFTY_SEVEN, 
+ /** The fifty eight. */
+ FIFTY_EIGHT, 
+ /** The fifty nine. */
+ FIFTY_NINE, 
+ /** The sixty. */
+ SIXTY, 
+ /** The sixty one. */
+ SIXTY_ONE, 
+ /** The sixty two. */
+ SIXTY_TWO, 
+ /** The sixty three. */
+ SIXTY_THREE, 
+ /** The sixty four. */
+ SIXTY_FOUR, 
+ /** The sixty five plus. */
+ SIXTY_FIVE_PLUS, 
+ /** The none. */
+ NONE
 	};
-	
-	public static ArrayList<AttributeType> attributes = new ArrayList<AttributeType>(Arrays.asList(AttributeType.values()));
 
-	
-	public static String getFullAge(String numeral){
+	/** The attributes. */
+	public static ArrayList<AttributeType> attributes = new ArrayList<AttributeType>(
+			Arrays.asList(AttributeType.values()));
+
+	/**
+	 * Gets the full age.
+	 *
+	 * @param numeral the numeral
+	 * @return the full age
+	 */
+	public static String getFullAge(String numeral) {
 		return ageBandMap.get(numeral);
 	}
-	
-
 
 }

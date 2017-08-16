@@ -1,24 +1,61 @@
 package plan;
 
-import components.Attribute;
 import components.Attribute.AttributeType;
 import plan.PlanError.RateType;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PlanWarning.
+ */
 public class PlanWarning {
 
+	/** The warning type. */
 	final Warning warningType;
+	
+	/** The attribute. */
 	final AttributeType attribute;
+	
+	/** The type. */
 	final RateType type;
+	
+	/** The incorrect val. */
 	final String incorrectVal;
+	
+	/** The correct val. */
 	final String correctVal;
 	
+	/** The age band. */
 	String ageBand = "";
+	
+	/** The second att. */
 	AttributeType secondAtt;
 	
+	/**
+	 * The Enum Warning.
+	 */
 	public enum Warning{
-		MISSING_ATTRIBUTE, METAL_NOT_FOUND, PLAN_TYPE_NOT_FOUND, INVALID_PDF_LINK, UNRECOGNIZED_FORMAT
+		
+		/** The missing attribute. */
+		MISSING_ATTRIBUTE, 
+ /** The metal not found. */
+ METAL_NOT_FOUND, 
+ /** The plan type not found. */
+ PLAN_TYPE_NOT_FOUND, 
+ /** The invalid pdf link. */
+ INVALID_PDF_LINK, 
+ /** The unrecognized format. */
+ UNRECOGNIZED_FORMAT
 	}
 
+	/**
+	 * Instantiates a new plan warning.
+	 *
+	 * @param warning the warning
+	 * @param attribute the attribute
+	 * @param type the type
+	 * @param incorrectVal the incorrect val
+	 * @param correctVal the correct val
+	 */
 	public PlanWarning(Warning warning, AttributeType attribute, RateType type, String incorrectVal, String correctVal) {
 		this.warningType = warning;
 		this.attribute = attribute;
@@ -27,18 +64,38 @@ public class PlanWarning {
 		this.correctVal = correctVal;
 	}
 	
+	/**
+	 * Gets the warning type.
+	 *
+	 * @return the warning type
+	 */
 	public Warning getWarningType(){
 		return warningType;
 	}
 	
+	/**
+	 * Gets the attribute type.
+	 *
+	 * @return the attribute type
+	 */
 	public AttributeType getAttributeType(){
 		return attribute;
 	}
 	
+	/**
+	 * Sets the age band.
+	 *
+	 * @param age the new age band
+	 */
 	public void setAgeBand(String age){
 		this.ageBand = age;
 	}
 	
+	/**
+	 * Gets the warning message.
+	 *
+	 * @return the warning message
+	 */
 	public String getWarningMessage(){
 		switch(warningType){
 		case MISSING_ATTRIBUTE:
