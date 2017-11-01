@@ -8,7 +8,7 @@ import components.Main.Carrier;
 /**
  * The Class NJ_Amerihealth_Name.
  */
-public class NJ_Amerihealth_Name extends Product_Name {
+public class NJ_Amerihealth_Name extends ProductName {
 
 	/** The lower name. */
 	String lower_name = original_name.toLowerCase();
@@ -16,8 +16,6 @@ public class NJ_Amerihealth_Name extends Product_Name {
 	/** The tokens. */
 	String[] tokens = lower_name.split("\\s");
 
-	/** The att. */
-	public final Plan_Attribute att;
 
 	/**
 	 * Instantiates a new n J amerihealth name.
@@ -34,22 +32,21 @@ public class NJ_Amerihealth_Name extends Product_Name {
 		this.deductible = getDeductible();
 		this.coinsurance = getCoinsurance();
 		this.isPlusPlan = hasPlusAttribute();
-		this.att = getPlanAttribute();
 	}
-
-	/** The plan type abbrev map. */
-	public final HashMap<Plan_Attribute, String[]> planTypeAbbrevMap = new HashMap<Plan_Attribute, String[]>() {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		{
-			put(Plan_Attribute.National, new String[] { "ntl" });
-			put(Plan_Attribute.Preferred, new String[] { "pfd, prefd" });
-			put(Plan_Attribute.Value, new String[] { "val" });
-		}
-	};
+//
+//	/** The plan type abbrev map. */
+//	public final HashMap<Plan_Attribute, String[]> planTypeAbbrevMap = new HashMap<Plan_Attribute, String[]>() {
+//		/**
+//		 * 
+//		 */
+//		private static final long serialVersionUID = 1L;
+//
+//		{
+//			put(Plan_Attribute.National, new String[] { "ntl" });
+//			put(Plan_Attribute.Preferred, new String[] { "pfd, prefd" });
+//			put(Plan_Attribute.Value, new String[] { "val" });
+//		}
+//	};
 
 	/**
 	 * The Enum Plan_Attribute.
@@ -125,23 +122,11 @@ public class NJ_Amerihealth_Name extends Product_Name {
 	}
 
 	/**
-	 * Checks for plus attribute.
-	 *
-	 * @return true, if successful
-	 */
-	public boolean hasPlusAttribute() {
-		if (lower_name.contains("+") || lower_name.contains("plus")) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
 	 * Checks for HSA attribute.
 	 *
 	 * @return true, if successful
 	 */
-	public boolean hasHSAAttribute() {
+	public Boolean hasHSAAttribute() {
 		String[] tokens = lower_name.split("\\s");
 		for (String s : tokens) {
 			if (s.equals("hsa")) {
@@ -163,27 +148,6 @@ public class NJ_Amerihealth_Name extends Product_Name {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Gets the plan attribute.
-	 *
-	 * @return the plan attribute
-	 */
-	public Plan_Attribute getPlanAttribute() {
-		for (String s : tokens) {
-			for (Plan_Attribute plan_att : Plan_Attribute.values()) {
-				if (s.equals(plan_att.toString().toLowerCase())) {
-					return plan_att;
-				}
-				for (String abbrev : planTypeAbbrevMap.get(plan_att)) {
-					if (s.equals(abbrev)) {
-						return plan_att;
-					}
-				}
-			}
-		}
-		return Plan_Attribute.None;
 	}
 
 }

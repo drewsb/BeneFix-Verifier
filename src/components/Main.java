@@ -46,95 +46,95 @@ import verifier.Verifier;
 
 // TODO: Auto-generated Javadoc
 /**
-* <h1>Benefix-Verifier</h1>
-* The Benefix Verifier program performs a series of checks and validations on a given set
-* of plans. The Main class controls the GUI of the application and serves as a bridge 
-* between the user and the verification program. The GUI gives the user the ability to upload multiple
-* sets of plans, pick the tests they want to be performed, and generate a report consisting of 
-* all warnings and errors found in the data.  
-* <p>
-*
-* @author  Drew Boyette
-* @version 1.0
-* @since   2017-08-16
-*/
+ * <h1>Benefix-Verifier</h1> The Benefix Verifier program performs a series of
+ * checks and validations on a given set of plans. The Main class controls the
+ * GUI of the application and serves as a bridge between the user and the
+ * verification program. The GUI gives the user the ability to upload multiple
+ * sets of plans, pick the tests they want to be performed, and generate a
+ * report consisting of all warnings and errors found in the data.
+ * <p>
+ *
+ * @author Drew Boyette
+ * @version 1.0
+ * @since 2017-08-16
+ */
 public class Main extends JPanel implements ActionListener {
-	
+
 	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
-	
+
 	/** The Constant newline. */
 	static private final String newline = "\n";
 
 	/** The clear button. */
 	JButton uploadButton, verifyButton, clearButton;
-	
+
 	/** The type box. */
 	JComboBox<String> typeBox;
-	
+
 	/** The carrier box. */
 	JComboBox<String> carrierBox;
-	
+
 	/** The state box. */
 	JComboBox<String> stateBox;
-	
+
 	/** The selected plans. */
 	ArrayList<File> selectedPlans;
-	
+
 	/** The progress bar. */
 	JProgressBar progressBar;
-	
+
 	/** The log. */
 	public JTextArea log;
-	
+
 	/** The fc. */
 	JFileChooser fc;
-	
+
 	/** The delegator. */
 	Delegator<?> delegator;
-	
+
 	/** The verifier. */
 	Verifier<Plan> verifier;
-	
+
 	/** The reports. */
 	ArrayList<Report<? extends Plan>> reports;
-	
+
 	/** The error summary box. */
 	JCheckBox monBox, cvBox, incBox, pdfBox, statisticsBox, errorSummaryBox;
-	
+
 	/** The input file. */
 	File inputFile;
-	
+
 	/** The filename. */
 	String filename;
-	
+
 	/** The done. */
 	Boolean done;
-	
+
 	/** The year. */
 	String year;
-	
+
 	/** The selected operation. */
 	String selectedOperation;
-	
+
 	/** The selected state. */
 	State selectedState;
-	
+
 	/** The carrier type. */
 	Carrier carrierType;
-	
+
 	/** The plan type. */
 	PlanType planType;
-	
+
 	/** The medical carriers. */
 	HashMap<String, Set<String>> medicalCarriers;
-	
+
 	/** The dental carriers. */
 	HashMap<String, Set<String>> dentalCarriers;
-	
+
 	/** The vision carriers. */
 	HashMap<String, Set<String>> visionCarriers;
-	
+
 	/** The source carriers. */
 	HashMap<String, Set<String>> sourceCarriers;
 
@@ -142,67 +142,21 @@ public class Main extends JPanel implements ActionListener {
 	 * The Enum Carrier.
 	 */
 	public enum Carrier {
-		
-		/** The Anthem. */
-		Anthem, 
- /** The upmc. */
- UPMC, 
- /** The Aetna. */
- Aetna, 
- /** The cpa. */
- CPA, 
- /** The nepa. */
- NEPA, 
- /** The wpa. */
- WPA, 
- /** The ibc. */
- IBC, 
- /** The cbc. */
- CBC, 
- /** The Ameri health. */
- AmeriHealth, 
- /** The uhc. */
- UHC, 
- /** The Oxford. */
- Oxford, 
- /** The Cigna. */
- Cigna, 
- /** The Horizon. */
- Horizon, 
- /** The Geisinger. */
- Geisinger, 
- /** The Delta. */
- Delta, 
- /** The none. */
- NONE
+		Anthem, UPMC, Aetna, CPA, NEPA, WPA, IBC, CBC, AmeriHealth, UHC, Oxford, Cigna, Horizon, Geisinger, Delta, NONE
 	}
 
 	/**
 	 * The Enum State.
 	 */
 	public enum State {
-		
-		/** The nj. */
-		NJ, 
- /** The pa. */
- PA, 
- /** The ca. */
- CA, 
- /** The oh. */
- OH
+		NJ, PA, CA, OH
 	}
 
 	/**
 	 * The Enum PlanType.
 	 */
 	public enum PlanType {
-		
-		/** The Medical. */
-		Medical, 
- /** The Dental. */
- Dental, 
- /** The Vision. */
- Vision
+		Medical, Dental, Vision
 	}
 
 	/** The carrier abbrev map. */
@@ -376,8 +330,11 @@ public class Main extends JPanel implements ActionListener {
 		statisticsBox.setSelected(true);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
 	public void actionPerformed(ActionEvent e) {
 		// Handle open plan button action.
@@ -499,8 +456,10 @@ public class Main extends JPanel implements ActionListener {
 	/**
 	 * Creates the excel.
 	 *
-	 * @throws FileNotFoundException the file not found exception
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws FileNotFoundException
+	 *             the file not found exception
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	public void createExcel() throws FileNotFoundException, IOException {
 		ExcelWriter<? extends Plan> writer = null;
@@ -619,9 +578,10 @@ public class Main extends JPanel implements ActionListener {
 	}
 
 	/**
-	 *  Returns an ImageIcon, or null if the path was invalid.
+	 * Returns an ImageIcon, or null if the path was invalid.
 	 *
-	 * @param path the path
+	 * @param path
+	 *            the path
 	 * @return the image icon
 	 */
 	protected static ImageIcon createImageIcon(String path) {
@@ -654,7 +614,8 @@ public class Main extends JPanel implements ActionListener {
 	/**
 	 * The main method.
 	 *
-	 * @param args the arguments
+	 * @param args
+	 *            the arguments
 	 */
 	public static void main(String[] args) {
 		// Schedule a job for the event dispatch thread:

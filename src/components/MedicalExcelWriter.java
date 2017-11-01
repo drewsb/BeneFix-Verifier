@@ -359,7 +359,7 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 			Warning warningType = warning.getWarningType();
 			AttributeType att = warning.getAttributeType();
 
-			if (warningType != Warning.PLAN_TYPE_NOT_FOUND) {
+			if (warningType != Warning.UNRECOGNIZED_PRODUCT_NAME_FORMAT) {
 				location = Attribute.attributes.indexOf(att);
 				cell = row.getCell(location);
 				cell.setCellStyle(highlighter);
@@ -401,6 +401,8 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 			cell.setCellValue("Warning Type");
 			cell = row.createCell(col_index++);
 			cell.setCellValue("Description");
+			cell = row.createCell(col_index++);
+			cell.setCellValue("PDF Link");
 			for (MedicalPlan p : r.getPlans()) {
 				boolean alreadyFilledPlanName = false;
 				if (!p.hasErrors() & !p.hasWarnings()) {
@@ -419,6 +421,10 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 
 					cell = row.createCell(++col_index);
 					cell.setCellValue(e.getErrorMessage());
+					if(e.getPDFURL() != null){
+						cell = row.createCell(++col_index);
+						cell.setCellValue(e.getPDFURL());
+					}
 					col_index = 0;
 				}
 				for (PlanWarning w : p.getWarnings()) {
@@ -430,9 +436,12 @@ public class MedicalExcelWriter implements ExcelWriter<MedicalPlan> {
 					alreadyFilledPlanName = true;
 					cell = row.createCell(++col_index);
 					cell.setCellValue(w.getWarningType().toString());
-
 					cell = row.createCell(++col_index);
 					cell.setCellValue(w.getWarningMessage());
+					if(w.getPDFURL() != null){
+						cell = row.createCell(++col_index);
+						cell.setCellValue(w.getPDFURL());
+					}
 					col_index = 0;
 				}
 			}

@@ -13,7 +13,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.commons.io.FileUtils;
 
-import parser.*;
 import components.*;
 import components.Main.*;
 import components.Attribute.*;
@@ -21,7 +20,8 @@ import plan.*;
 import plan.PlanWarning.*;
 import plan.PlanError.*;
 import names.*;
-import names.Product_Name.Metal;
+import names.ProductName.Metal;
+import names.ProductName.ProductNameAttribute;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -47,6 +47,8 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 	/** The attribute index map. */
 	HashMap<String, Integer> attributeIndexMap;
 
+	HashMap<String, URL> pdfLinkMap;
+
 	/** The age bands. */
 	String[] ageBands = { "0-18", "19-20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33",
 			"34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51",
@@ -66,6 +68,7 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 		this.carrier = carrier;
 		plans = new ArrayList<MedicalPlan>();
 		warnings = new ArrayList<PlanWarning>();
+		pdfLinkMap = new HashMap<String, URL>();
 	}
 
 	/*
@@ -301,27 +304,28 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 	@Override
 	public void verifyCV() {
 		for (int i = 1; i < plans.size(); i++) {
-			Double firstVal = plans.get(i - 1).non_tobacco_stats.getCV();
-			Double secondVal = plans.get(i).non_tobacco_stats.getCV();
-			if (Double.compare(firstVal, secondVal) != 0) {
+			if (!plans.get(i).non_tobacco_dict.isEmpty()) {
+				Double firstVal = plans.get(i - 1).non_tobacco_stats.getCV();
+				Double secondVal = plans.get(i).non_tobacco_stats.getCV();
+				if (Double.compare(firstVal, secondVal) != 0) {
 
-				PlanError newError = new PlanError(PlanError.Error.CV, Attribute.AttributeType.NONE,
-						PlanError.RateType.NON_TOBACCO, secondVal.toString(), firstVal.toString());
-				plans.get(i).addError(newError);
-				i++;
-			}
-
-			if (plans.get(i).hasTobaccoRates()) {
-				Double firstTobVal = plans.get(i - 1).tobacco_stats.getCV();
-				Double secondTobVal = plans.get(i).tobacco_stats.getCV();
-				if (Double.compare(firstTobVal, secondTobVal) != 0) {
 					PlanError newError = new PlanError(PlanError.Error.CV, Attribute.AttributeType.NONE,
-							PlanError.RateType.TOBACCO, secondTobVal.toString(), firstTobVal.toString());
+							PlanError.RateType.NON_TOBACCO, secondVal.toString(), firstVal.toString());
 					plans.get(i).addError(newError);
 					i++;
 				}
-			}
 
+				if (plans.get(i).hasTobaccoRates()) {
+					Double firstTobVal = plans.get(i - 1).tobacco_stats.getCV();
+					Double secondTobVal = plans.get(i).tobacco_stats.getCV();
+					if (Double.compare(firstTobVal, secondTobVal) != 0) {
+						PlanError newError = new PlanError(PlanError.Error.CV, Attribute.AttributeType.NONE,
+								PlanError.RateType.TOBACCO, secondTobVal.toString(), firstTobVal.toString());
+						plans.get(i).addError(newError);
+						i++;
+					}
+				}
+			}
 		}
 		return;
 	}
@@ -334,6 +338,7 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 	@Override
 	public void verifyPDFMapping(MedicalPlan plan) throws IOException {
 		PlanError new_error;
+		PlanWarning new_warning;
 		URL plan_url = null;
 		if (plan.plan_pdf_url == null) {
 			return;
@@ -342,7 +347,7 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 		try {
 			plan_url = new URL(plan.plan_pdf_url);
 		} catch (MalformedURLException e) {
-			PlanWarning new_warning = new PlanWarning(Warning.INVALID_PDF_LINK, AttributeType.PLAN_PDF_FILE_URL, null,
+			new_warning = new PlanWarning(Warning.INVALID_PDF_LINK, AttributeType.PLAN_PDF_FILE_URL, null,
 					plan.plan_pdf_url, "");
 			plan.addWarning(new_warning);
 			return;
@@ -365,43 +370,143 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 				}
 			}
 		}
-		if(index == 5){
-			PlanWarning new_warning = new PlanWarning(Warning.INVALID_PDF_LINK, AttributeType.PLAN_PDF_FILE_URL, null,
+		if (index == 5) {
+			new_warning = new PlanWarning(Warning.INVALID_PDF_LINK, AttributeType.PLAN_PDF_FILE_URL, null,
 					plan.plan_pdf_url, "");
 			plan.addWarning(new_warning);
 			return;
 		}
+
+		if (pdfLinkMap.containsKey(plan.product_name)) {
+			if (!pdfLinkMap.get(plan.product_name).equals(plan_url)) {
+				new_error = new PlanError(PlanError.Error.PDF_MISMATCH, Attribute.AttributeType.PRODUCT_NAME, null, "",
+						"");
+				new_error.setPDFURL(plan_url.toString());
+				plan.addError(new_error);
+			}
+			return;
+		}
+
 		PDFManager pdfManager = new PDFManager(file);
-		String text = pdfManager.ToText();
+		String text = pdfManager.ToText().toLowerCase();
 		String[] tokens = text.split("[\\s\\r\\n]+");
 
-		Parser parser = new Parser(tokens, carrier);
-		Product_Name p_name = new Product_Name(plan.product_name);
+		pdfLinkMap.put(plan.product_name, plan_url);
+		PDFVerifier pdfVerifier = new PDFVerifier(tokens);
+		ProductName p_name = new ProductName(plan.product_name);
+		pdfVerifier.verifyAttributes(p_name);
 
 		if (p_name.metal == Metal.None) {
-			PlanWarning new_warning = new PlanWarning(PlanWarning.Warning.METAL_NOT_FOUND,
+			new_warning = new PlanWarning(PlanWarning.Warning.UNRECOGNIZED_PRODUCT_NAME_FORMAT,
 					Attribute.AttributeType.PRODUCT_NAME, null, p_name.original_name, "");
+			new_warning.setProductNameAttribute(ProductNameAttribute.Metal);
 			plan.addWarning(new_warning);
 		}
 
-		if (p_name.plan == Product_Name.Plan.None) {
-			PlanWarning new_warning = new PlanWarning(PlanWarning.Warning.PLAN_TYPE_NOT_FOUND,
+		if (p_name.plan == ProductName.Plan.None) {
+			new_warning = new PlanWarning(PlanWarning.Warning.UNRECOGNIZED_PRODUCT_NAME_FORMAT,
 					Attribute.AttributeType.PRODUCT_NAME, null, p_name.original_name, "");
+			new_warning.setProductNameAttribute(ProductNameAttribute.Plan);
 			plan.addWarning(new_warning);
 		}
 
-		if (!parser.findProductName(p_name.original_name)) {
-			if (!parser.findMetal(p_name.metal) & p_name.metal != Metal.None) {
-				new_error = new PlanError(PlanError.Error.PDF_METAL_MISMATCH, Attribute.AttributeType.PRODUCT_NAME,
-						null, p_name.metal.toString(), "");
-				plan.addError(new_error);
-			}
-			if (!parser.findPlan(p_name.plan) & p_name.plan != Product_Name.Plan.None) {
-				new_error = new PlanError(PlanError.Error.PDF_PLAN_MISMATCH, Attribute.AttributeType.PRODUCT_NAME, null,
-						p_name.plan.toString(), "");
-				plan.addError(new_error);
-			}
+		if (pdfVerifier.matchesMetal == -1) {
+			new_warning = new PlanWarning(PlanWarning.Warning.PDF_ATTRIBUTE_MISSING,
+					Attribute.AttributeType.PRODUCT_NAME, null, p_name.metal.toString(),
+					pdfVerifier.pdfMetal.toString());
+			new_warning.setProductNameAttribute(ProductNameAttribute.Metal);
+			new_warning.setPDFURL(plan_url.toString());
+			plan.addWarning(new_warning);
 		}
+
+		if (pdfVerifier.matchesPlan == -1) {
+			new_warning = new PlanWarning(PlanWarning.Warning.PDF_ATTRIBUTE_MISSING,
+					Attribute.AttributeType.PRODUCT_NAME, null, p_name.plan.toString(), pdfVerifier.pdfPlan.toString());
+			new_warning.setProductNameAttribute(ProductNameAttribute.Plan);
+			new_warning.setPDFURL(plan_url.toString());
+			plan.addWarning(new_warning);
+		}
+
+		if (pdfVerifier.matchesPlanAttribute == -1) {
+			new_warning = new PlanWarning(PlanWarning.Warning.PDF_ATTRIBUTE_MISSING,
+					Attribute.AttributeType.PRODUCT_NAME, null, p_name.planAtt.toString(),
+					pdfVerifier.pdfPlanAtt.toString());
+			new_warning.setProductNameAttribute(ProductNameAttribute.PlanAtt);
+			new_warning.setPDFURL(plan_url.toString());
+			plan.addWarning(new_warning);
+		}
+
+		if (pdfVerifier.matchesPlusAttribute == -1) {
+			new_warning = new PlanWarning(PlanWarning.Warning.PDF_ATTRIBUTE_MISSING,
+					Attribute.AttributeType.PRODUCT_NAME, null, p_name.hasPlusAttribute().toString(), "");
+			new_warning.setProductNameAttribute(ProductNameAttribute.Plus);
+			new_warning.setPDFURL(plan_url.toString());
+			plan.addWarning(new_warning);
+		}
+
+		if (pdfVerifier.matchesHSAAttribute == -1) {
+			new_warning = new PlanWarning(PlanWarning.Warning.PDF_ATTRIBUTE_MISSING,
+					Attribute.AttributeType.PRODUCT_NAME, null, p_name.hasHSAAttribute().toString(), "");
+			new_warning.setProductNameAttribute(ProductNameAttribute.HSA);
+			new_warning.setPDFURL(plan_url.toString());
+			plan.addWarning(new_warning);
+		}
+		if (pdfVerifier.matchesHRAAttribute == -1) {
+			new_warning = new PlanWarning(PlanWarning.Warning.PDF_ATTRIBUTE_MISSING,
+					Attribute.AttributeType.PRODUCT_NAME, null, p_name.hasHRAAttribute().toString(), "");
+			new_warning.setProductNameAttribute(ProductNameAttribute.HRA);
+			new_warning.setPDFURL(plan_url.toString());
+			plan.addWarning(new_warning);
+		}
+
+		if (pdfVerifier.matchesMetal == 1) {
+			new_error = new PlanError(PlanError.Error.PDF_ATTRIBUTE_MISMATCH, Attribute.AttributeType.PRODUCT_NAME,
+					null, pdfVerifier.pdfMetal.toString(), "");
+			new_error.setProductNameAttribute(ProductNameAttribute.Metal);
+			new_error.setPDFURL(plan_url.toString());
+			plan.addError(new_error);
+		}
+
+		if (pdfVerifier.matchesPlan == 1) {
+			new_error = new PlanError(PlanError.Error.PDF_ATTRIBUTE_MISMATCH, Attribute.AttributeType.PRODUCT_NAME,
+					null, pdfVerifier.pdfPlan.toString(), "");
+			new_error.setProductNameAttribute(ProductNameAttribute.Plan);
+			new_error.setPDFURL(plan_url.toString());
+			plan.addError(new_error);
+		}
+
+		if (pdfVerifier.matchesPlanAttribute == 1) {
+			new_error = new PlanError(PlanError.Error.PDF_ATTRIBUTE_MISMATCH, Attribute.AttributeType.PRODUCT_NAME,
+					null, pdfVerifier.pdfPlanAtt.toString(), "");
+			new_error.setProductNameAttribute(ProductNameAttribute.PlanAtt);
+			new_error.setPDFURL(plan_url.toString());
+			plan.addError(new_error);
+		}
+
+		if (pdfVerifier.matchesPlusAttribute == 1) {
+			new_error = new PlanError(PlanError.Error.PDF_ATTRIBUTE_MISMATCH, Attribute.AttributeType.PRODUCT_NAME,
+					null, p_name.hasPlusAttribute().toString(), "");
+			new_error.setProductNameAttribute(ProductNameAttribute.Plus);
+			new_error.setPDFURL(plan_url.toString());
+			plan.addError(new_error);
+		}
+
+		if (pdfVerifier.matchesHSAAttribute == 1) {
+			new_error = new PlanError(PlanError.Error.PDF_ATTRIBUTE_MISMATCH, Attribute.AttributeType.PRODUCT_NAME,
+					null, p_name.hasHSAAttribute().toString(), "");
+			new_error.setProductNameAttribute(ProductNameAttribute.HSA);
+			new_error.setPDFURL(plan_url.toString());
+			plan.addError(new_error);
+		}
+
+		if (pdfVerifier.matchesHRAAttribute == 1) {
+			new_error = new PlanError(PlanError.Error.PDF_ATTRIBUTE_MISMATCH, Attribute.AttributeType.PRODUCT_NAME,
+					null, p_name.hasHRAAttribute().toString(), "");
+			new_error.setProductNameAttribute(ProductNameAttribute.HRA);
+			new_error.setPDFURL(plan_url.toString());
+			plan.addError(new_error);
+		}
+
 		return;
 	}
 
@@ -975,44 +1080,44 @@ public class MedicalVerifier implements Verifier<MedicalPlan> {
 	 *            the tokens
 	 * @return the parser
 	 */
-	public Parser getParser(Carrier c, String[] tokens) {
-		switch (c) {
-		case NEPA:
-			return new PA_NEPA_Parser(tokens, carrier);
-		case Aetna:
-			break;
-		case AmeriHealth:
-			break;
-		case Anthem:
-			break;
-		case CBC:
-			break;
-		case CPA:
-			break;
-		case Cigna:
-			break;
-		case Delta:
-			break;
-		case Geisinger:
-			break;
-		case Horizon:
-			break;
-		case IBC:
-			break;
-		case NONE:
-			break;
-		case Oxford:
-			break;
-		case UHC:
-			break;
-		case UPMC:
-			break;
-		case WPA:
-			break;
-		default:
-			break;
-		}
-		return null;
-	}
+	// public Parser getParser(String[] tokens) {
+	// switch (c) {
+	// case NEPA:
+	// return new PA_NEPA_Parser(tokens);
+	// case Aetna:
+	// break;
+	// case AmeriHealth:
+	// break;
+	// case Anthem:
+	// break;
+	// case CBC:
+	// break;
+	// case CPA:
+	// break;
+	// case Cigna:
+	// break;
+	// case Delta:
+	// break;
+	// case Geisinger:
+	// break;
+	// case Horizon:
+	// break;
+	// case IBC:
+	// break;
+	// case NONE:
+	// break;
+	// case Oxford:
+	// break;
+	// case UHC:
+	// break;
+	// case UPMC:
+	// break;
+	// case WPA:
+	// break;
+	// default:
+	// break;
+	// }
+	// return null;
+	// }
 
 }
